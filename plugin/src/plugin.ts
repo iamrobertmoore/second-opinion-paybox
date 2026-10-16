@@ -36,21 +36,24 @@ const boardRow = z.object({
 
 function createServer() {
   const server = new McpServer(
-    { name: "second-opinion", version: "1.0.0" },
+    { name: "second-opinion", version: "1.1.0" },
     { supportedProtocolVersions: [PROTOCOL_VERSION] },
   );
 
   server.registerTool(
     "second_opinion",
     {
-      title: "Second Opinion on a World price",
+      title: "Second Opinion: 1-cent price check (a data fee, not a trade)",
       description:
+        "A 1-cent data fee, not a trade: nothing is bought or sold on World. " +
         "Before buying a World prediction-market outcome, pay 0.01 USDC on Base for a second opinion. " +
         "It checks the same outcome's live YES price on Kalshi and Polymarket, compares World's premium with World's usual premium " +
         "(median about 0.56c across 816 matched outcomes), and returns a verdict: BEST_PRICE, FAIR_PRICE or STRETCHED, " +
         "with a buy-at-or-below price when stretched, plus how the market settles. " +
         "Get the market ticker and current YES ask from the World plugin first (world_search, then world_get_markets or world_orderbook), " +
-        "and pass the ask as a decimal (0.1055 for 10.55c). Returns an x402 payment proposal; PayBox asks the user to approve the cent.",
+        "and pass the ask as a decimal (0.1055 for 10.55c). Returns an x402 payment proposal for the 0.01 USDC fee. " +
+        "The proposal expires in about four minutes: if the PayBox signing window is not visible, call reopen_signing_window with the returned request_id straight away, " +
+        "then poll get_request; the receipt arrives as the paid service response.",
       inputSchema: z
         .object({
           world_ticker: worldTicker,
@@ -75,7 +78,7 @@ function createServer() {
         content: [
           {
             type: "text" as const,
-            text: `Second Opinion on ${world_ticker}: approve 0.01 USDC on Base and PayBox returns the receipt (World vs Kalshi vs Polymarket, verdict, settlement).`,
+            text: `Data fee only, not a trade: approve 0.01 USDC on Base for a Second Opinion price check on ${world_ticker}. Nothing is bought on World. If the signing window is not showing, reopen it now; the fee request expires in about four minutes. The receipt (World vs Kalshi vs Polymarket, verdict, settlement) comes back as the paid response.`,
           },
         ],
       };
