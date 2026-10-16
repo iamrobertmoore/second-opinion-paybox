@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/demo.gif" alt="The Second Opinion receipt: Maduro YES on World at 80.77c is stamped STRETCHED next to Polymarket at 71.50c, then Vance YES comes back FAIR" width="900"></p>
+<p align="center"><img src="docs/demo.gif" alt="The Second Opinion receipt: Newsom YES for 2028 on World is stamped STRETCHED next to Kalshi and Polymarket, then Karen Bass YES for LA mayor comes back FAIR PRICE" width="900"></p>
 
 <h1 align="center">Second Opinion</h1>
 
