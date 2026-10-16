@@ -55,12 +55,13 @@ The plugin has three tools:
 
 ## Proof it runs end to end
 
-Two real paid checks from my own PayBox account on 16 October, both on Newsom YES for 2028:
+Three real paid checks from my own PayBox account on 16 October, all on Newsom YES for 2028. The third used plugin v1.2, where the agent fetched World's live price from the World plugin first:
 
 | When (UTC) | Verdict | Base transaction |
 |---|---|---|
 | 15:58 | STRETCHED, World 10.55c vs Polymarket 9.00c, buy at 9.6c or less | [`0x970adb03...8b8a`](https://basescan.org/tx/0x970adb03a9dc0d1d82a8ac0756859547a96fe6d46348d807d7d0b913e3ed8b8a) |
 | 16:04 | STRETCHED, same numbers | [`0x872e1d37...4c3b`](https://basescan.org/tx/0x872e1d3704220b05194f971c3b4902867c8fa31211dba69b9029db9efb754c3b) |
+| 16:24 | STRETCHED, World's live ask 10.55c from the World plugin vs Kalshi 10.00c and Polymarket 9.00c | [`0xf46b8dc6...a6a7`](https://basescan.org/tx/0xf46b8dc6db9cf368d478e1fca67ef41eb7b859d3169e06b4d980f4498020a6a7) |
 
 Each one is a 10,000-unit (0.01) USDC transfer on Base from my PayBox wallet to the service's receiving address, settled through x402.
 
