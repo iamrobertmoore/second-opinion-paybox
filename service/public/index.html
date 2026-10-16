@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Second Opinion for PayBox</title>
+<meta name="description" content="A PayBox plugin. Before an agent buys a YES on World, it pays 0.01 USDC to compare the price with Kalshi and Polymarket and gets a verdict.">
+<meta name="theme-color" content="#3B1CF5">
+<meta property="og:title" content="Second Opinion for PayBox">
+<meta property="og:description" content="Your agent pays a cent to catch the one bad price in ten.">
+<meta property="og:image" content="https://second-opinion-paybox.vercel.app/og.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%233B1CF5'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23D7FF3A'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400;62..125,600;62..125,900&family=Martian+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --desk:#3B1CF5;--desk-hi:#5B3CFF;--desk-lo:#1E0C9E;
+  --slip:#FFF7E6;--paper:#F5EFE1;--ink:#1A1530;--ink-2:#3A3352;--muted:#6B6580;
+  --lime:#D7FF3A;--red:#FF3B2F;--green:#00A66E;--grey:#8A849A;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --sans:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Martian Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --gut:64px;
+}
+*{box-sizing:border-box}
+html{background:#3B1CF5;scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:#F5EFE1;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+button{font:inherit}
+:focus-visible{outline:3px solid var(--lime);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---------- HERO ---------- */
+.hero{position:relative;display:flex;flex-direction:column;min-height:100vh;min-height:100svh;color:var(--slip);overflow:clip;
+  background:radial-gradient(1200px 720px at 86% -4%,var(--desk-hi) 0%,transparent 60%),radial-gradient(900px 620px at -2% 104%,var(--desk-lo) 0%,transparent 60%),var(--desk)}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.16;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.bar{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;max-width:1280px;margin:0 auto;padding:24px var(--gut) 0}
+.brand{display:flex;align-items:center;gap:10px;font:600 13px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:#CFC8FF;text-decoration:none}
+.dot{flex:none;width:10px;height:10px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 4px rgba(215,255,58,.25)}
+.nav{display:flex;gap:24px;font:600 12.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase}
+.nav a{color:#CFC8FF;text-decoration:none;padding:6px 0;white-space:nowrap}
+.nav a:hover{color:#fff}
+.stage{position:relative;z-index:2;flex:1;display:grid;grid-template-columns:minmax(0,1fr) 488px;gap:56px;align-items:center;width:100%;max-width:1280px;margin:0 auto;padding:12px var(--gut) 34px}
+h1{margin:0;font-family:var(--sans);font-stretch:62%;font-weight:900;font-size:clamp(60px,9.2vw,118px);line-height:.86;text-transform:uppercase;letter-spacing:-.005em}
+h1 em{font-style:normal;color:var(--lime);white-space:nowrap}
+.sub{margin:22px 0 0;font-size:19px;line-height:1.45;max-width:530px;color:#E9E5FF}
+.sub b{color:#fff;font-weight:600}
+
+.judge{margin-top:28px;max-width:560px}
+.jl{display:flex;align-items:center;gap:10px;font:600 12px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--lime);margin-bottom:12px}
+.search{position:relative;display:flex;box-shadow:0 18px 40px rgba(10,0,60,.35);border-radius:3px}
+.search input{flex:1;min-width:0;height:54px;border:0;border-radius:3px 0 0 3px;background:var(--slip);color:var(--ink);font:500 14.5px var(--mono);padding:0 16px;-webkit-appearance:none;appearance:none}
+.search input::placeholder{color:#8A849A}
+.search input::-webkit-search-cancel-button{display:none}
+.search input:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
+.go{flex:none;height:54px;border:0;border-radius:0 3px 3px 0;background:var(--lime);color:var(--ink);font:900 18px/1 var(--sans);font-stretch:72%;letter-spacing:.07em;text-transform:uppercase;padding:0 24px;cursor:pointer;transition:background .15s}
+.go:hover{background:#E8FF85}
+#sug{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:30;list-style:none;margin:0;padding:6px;background:var(--slip);color:var(--ink);border-radius:3px;box-shadow:0 26px 50px rgba(10,0,60,.5);max-height:320px;overflow:auto}
+#sug[hidden]{display:none}
+#sug li{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:baseline;padding:10px 12px;border-radius:2px;cursor:pointer}
+#sug li[aria-selected="true"],#sug li:hover{background:#EFE4CA}
+#sug li b{font:600 15px/1.25 var(--sans)}
+#sug li span{grid-column:1;font-size:13px;color:var(--muted)}
+#sug li code{grid-column:2;grid-row:1/3;align-self:center;font:500 10px var(--mono);color:var(--desk)}
+#sug li.empty{display:block;cursor:default;color:var(--muted);font-size:14px}
+#sug li.empty:hover{background:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{appearance:none;border:1.5px solid rgba(233,229,255,.36);background:rgba(26,21,48,.14);color:var(--slip);font:600 13.5px/1 var(--sans);padding:10px 12px;border-radius:3px;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.chip:hover{border-color:var(--lime)}
+.chip[aria-pressed="true"]{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+.note{margin:16px 0 0;font-size:13.5px;line-height:1.55;color:#C4BCFF;max-width:540px}
+.note b{color:var(--slip);font-weight:600}
+
+/* ---------- RECEIPT ---------- */
+.slipwrap{position:relative;transform:rotate(1.6deg);filter:drop-shadow(0 28px 34px rgba(10,0,60,.45)) drop-shadow(0 2px 2px rgba(10,0,60,.2))}
+.slip{position:relative;background:var(--slip);color:var(--ink);padding:24px 30px 40px;font:400 12.5px/1.5 var(--mono);font-variant-numeric:tabular-nums;
+  -webkit-mask:radial-gradient(circle 6px at 50% 100%,#0000 98%,#000) 0 0/14px 100% repeat-x;mask:radial-gradient(circle 6px at 50% 100%,#0000 98%,#000) 0 0/14px 100% repeat-x}
+.slip .h{display:flex;justify-content:space-between;font-weight:700;letter-spacing:.1em;font-size:13px}
+.slip .meta{color:var(--muted);font-size:10px;letter-spacing:.04em;margin:4px 0 14px;text-transform:uppercase;min-height:15px}
+.slip .q .ev{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slip .q b{display:block;font-size:14.5px;line-height:1.35;font-weight:700;text-transform:uppercase;margin-top:3px;overflow-wrap:anywhere}
+
+.ruler{position:relative;height:126px;margin:6px 0 4px;color:var(--red)}
+.axis{position:absolute;left:0;right:0;top:78px;height:2px;background:var(--ink)}
+.tick{position:absolute;top:73px;width:1px;height:12px;margin-left:-.5px;background:var(--ink)}
+.tl{position:absolute;top:90px;font-size:9.5px;line-height:1;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.ticks{transition:opacity .25s}
+.mk{position:absolute;top:0;width:0;height:0;transition:left .5s var(--ease),opacity .3s}
+.mk .pin{position:absolute;top:58px;left:-7px;width:14px;height:14px;border-radius:50%}
+.mk.world .pin{background:var(--desk);box-shadow:0 0 0 3px rgba(59,28,245,.16)}
+.mk.other .pin{border:2.5px solid var(--ink);background:var(--slip)}
+.mk .lead{position:absolute;left:-.5px;width:1px;top:calc(58px - var(--lead,4px));height:var(--lead,4px);background:repeating-linear-gradient(var(--ink) 0 2px,transparent 2px 4px);opacity:.45;transition:top .3s var(--ease),height .3s var(--ease)}
+.pl{position:absolute;top:0;font-size:10px;line-height:1.25;white-space:nowrap;text-align:center;color:var(--ink);transition:left .5s var(--ease),top .3s var(--ease),opacity .3s}
+.pl b{display:block;font-size:12px;font-weight:700}
+.pl.world{color:var(--desk)}
+.dim{position:absolute;top:116px;height:2px;background:currentColor;transform:scaleX(0);transition:transform .5s var(--ease)}
+.dim::before,.dim::after{content:"";position:absolute;top:-5px;width:2px;height:12px;background:currentColor}
+.dim::before{left:0}.dim::after{right:0}
+.dim.on{transform:scaleX(1)}
+.diml{position:absolute;top:109px;transform:translateX(-50%);background:var(--slip);padding:0 6px;font-size:11px;line-height:16px;font-weight:700;white-space:nowrap;opacity:0;transition:opacity .25s}
+.diml.on{opacity:1;transition-delay:.3s}
+.ruler.v-FAIR_PRICE{color:var(--ink)}
+.ruler.v-BEST_PRICE{color:var(--green)}
+.ruler .idle{position:absolute;left:0;right:0;top:40px;text-align:center;font-size:10.5px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+
+.row{display:flex;align-items:baseline;line-height:2}
+.row .k{white-space:nowrap}
+.row .k a{text-decoration:none;border-bottom:1px solid rgba(26,21,48,.25)}
+.row .k a:hover{border-bottom-color:var(--ink)}
+.row .d{flex:1;min-width:16px;border-bottom:1px dotted #ADA6BC;margin:0 8px;transform:translateY(-4px)}
+.row .v{white-space:nowrap;text-align:right}
+.row .v.soft{color:var(--muted)}
+.row .v.bad{color:var(--red)}
+.row .v.good{color:var(--green)}
+.row.tot{font-weight:700}
+.row.usual{font-size:11px;color:var(--muted);line-height:1.8}
+.row.usual .v{color:var(--ink)}
+.v.fresh{animation:ink .45s var(--ease)}
+@keyframes ink{from{opacity:0;transform:translateY(-4px)}}
+.busy .v.wait{animation:breathe 1.4s ease-in-out infinite}
+@keyframes breathe{50%{opacity:.3}}
+.rule{border-top:1.5px dashed var(--ink);margin:8px 0}
+.settle{display:grid;grid-template-columns:58px 1fr;gap:3px 10px;font-size:10px;line-height:1.55;color:var(--muted);margin:0}
+.settle dt{letter-spacing:.06em}
+.settle dd{margin:0;color:var(--ink-2)}
+.settle dd.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pay{margin:10px 0 0;font-size:9.5px;color:var(--muted);line-height:1.6;text-transform:uppercase;letter-spacing:.03em}
+.stamp{position:absolute;left:60%;bottom:76px;font:900 46px/1 var(--sans);font-stretch:68%;letter-spacing:.04em;text-transform:uppercase;padding:8px 14px 5px;border:5px solid currentColor;border-radius:7px;white-space:nowrap;pointer-events:none;
+  opacity:0;transform:translate(-50%,0) rotate(-9deg) scale(1.9);transition:opacity .22s,transform .22s cubic-bezier(.3,1.6,.5,1)}
+.stamp.on{opacity:.92;transform:translate(-50%,0) rotate(-9deg) scale(1)}
+.stamp.STRETCHED{color:var(--red);mix-blend-mode:multiply}
+.stamp.FAIR_PRICE{color:var(--green);mix-blend-mode:multiply}
+.stamp.BEST_PRICE{color:var(--slip);background:var(--green);border-color:var(--green);mix-blend-mode:multiply}
+.stamp.NO_SECOND_PRICE{color:var(--grey);font-size:36px;mix-blend-mode:multiply}
+
+/* ---------- TAPE ---------- */
+.tape{position:relative;z-index:2;display:flex;align-items:stretch;height:64px;background:var(--ink);border-top:3px solid var(--lime)}
+.lab{flex:none;position:relative;z-index:1;background:var(--lime);color:var(--ink);display:flex;flex-direction:column;justify-content:center;padding:0 22px;font:900 15px/1.05 var(--sans);font-stretch:70%;letter-spacing:.08em;text-transform:uppercase;box-shadow:16px 0 18px var(--ink)}
+.lab time{font:500 10px/1 var(--mono);letter-spacing:.02em;margin-top:5px;text-transform:none}
+.track{flex:1;min-width:0;display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none;padding-left:28px;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
+.track::-webkit-scrollbar{display:none}
+.ti{flex:none;display:flex;align-items:center;gap:10px;appearance:none;background:none;border:0;border-right:1px solid rgba(255,247,230,.14);color:var(--slip);font:400 13px/1 var(--mono);font-variant-numeric:tabular-nums;padding:0 22px;cursor:pointer;white-space:nowrap}
+.ti:first-child{padding-left:0}
+.ti b{font-weight:700;text-transform:uppercase}
+.ti i{font-style:normal;color:#9A93B5;font-size:11px}
+.ti .dn{color:#FF7A70;font-weight:700}
+.ti .up{color:var(--lime);font-weight:700}
+.ti:hover b{color:var(--lime)}
+.ti:focus-visible{outline-offset:-3px}
+.track .wait{align-self:center;color:#9A93B5;font:400 12px var(--mono)}
+
+/* ---------- SECTIONS ---------- */
+.sec{width:100%;max-width:1280px;margin:0 auto;padding:104px var(--gut)}
+.sec :focus-visible{outline-color:var(--desk)}
+.eyebrow{font:500 11.5px/1 var(--mono);color:var(--desk);letter-spacing:.06em;text-transform:uppercase}
+h2{margin:16px 0 0;font:900 clamp(50px,6.6vw,86px)/.88 var(--sans);font-stretch:62%;text-transform:uppercase;letter-spacing:-.005em}
+.lead{font-size:20px;line-height:1.5;max-width:660px;margin:22px 0 0;color:var(--ink-2)}
+.steps{list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;margin:60px 0 0}
+.step{border-top:2px solid var(--ink);padding-top:18px}
+.step .n{font:700 11.5px/1 var(--mono);color:var(--desk);letter-spacing:.04em}
+.step h3{margin:14px 0 10px;font:900 34px/.95 var(--sans);font-stretch:66%;text-transform:uppercase}
+.step p{margin:0;font-size:16.5px;line-height:1.55;color:var(--ink-2)}
+.step code{font:500 13px var(--mono);background:#E9E0CB;padding:1px 5px;border-radius:2px}
+.step pre{margin:16px 0 0;font:500 11.5px/1.65 var(--mono);background:var(--ink);color:var(--slip);padding:13px 15px;border-radius:3px;overflow-x:auto}
+.step pre .t{color:var(--lime)}
+.step pre .s{color:#BDB4FF}
+.appr{margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:1.5px solid var(--ink);border-radius:3px;padding:11px 14px;font:500 12px/1.4 var(--mono)}
+.appr b{font-weight:700}
+.appr span{font:900 14px/1 var(--sans);font-stretch:72%;letter-spacing:.06em;text-transform:uppercase;background:var(--lime);padding:8px 10px;border-radius:2px;white-space:nowrap}
+.prompt{margin-top:56px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px 20px;background:var(--desk);color:var(--slip);padding:24px 24px 24px 28px;border-radius:4px;position:relative;overflow:hidden}
+.prompt::before{content:"";position:absolute;inset:0;background:radial-gradient(600px 200px at 90% 0%,var(--desk-hi),transparent 70%);pointer-events:none}
+.prompt>*{position:relative}
+.prompt .pk{grid-column:1/-1;font:600 11.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--lime)}
+.prompt p{margin:0;font:500 clamp(14px,1.6vw,18px)/1.5 var(--mono)}
+.copy{appearance:none;border:0;background:var(--lime);color:var(--ink);font:900 17px/1 var(--sans);font-stretch:72%;letter-spacing:.07em;text-transform:uppercase;padding:14px 20px;border-radius:3px;cursor:pointer;min-width:104px}
+.copy:hover{background:#E8FF85}
+.prompt .copy:focus-visible{outline-color:var(--lime)}
+
+.numsec{border-top:2px solid var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:60px;border-top:2px solid var(--ink)}
+.stat{padding:22px 24px 0 0}
+.stat+.stat{padding-left:24px;border-left:1px solid #CFC5AE}
+.stat .big{display:block;white-space:nowrap;font:700 clamp(30px,4.4vw,58px)/1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.stat .big.red{color:var(--red)}
+.stat .cap{display:block;margin-top:12px;font-size:15px;line-height:1.4;color:var(--ink-2)}
+.dist{margin:64px 0 0;max-width:880px}
+.dist .bar2{position:relative;height:30px;display:flex;border-radius:2px;overflow:hidden}
+.dist .z1{background:var(--ink)}
+.dist .z2{background:repeating-linear-gradient(-45deg,var(--red) 0 6px,#FF6A60 6px 12px)}
+.dist .marks{position:relative;height:66px;font:500 11px/1.4 var(--mono);color:var(--ink-2)}
+.dist .m{position:absolute;top:0;transform:translateX(-50%);text-align:center;white-space:nowrap}
+.dist .m::before{content:"";display:block;width:2px;height:12px;background:var(--ink);margin:0 auto 6px}
+.dist .m.r{color:var(--red)}
+.dist .m.r::before{background:var(--red)}
+.dist .m b{display:block;font-weight:700;color:var(--ink)}
+.dist .m.r b{color:var(--red)}
+.dist .axislbl{position:relative;height:22px;font:400 10.5px/1 var(--mono);color:var(--muted)}
+.dist .axislbl span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+.dist .axislbl span:first-child{transform:none}
+.dist .axislbl span:last-child{transform:translateX(-100%)}
+.dist figcaption{margin-top:4px;line-height:1.5;font-size:14px;color:var(--ink-2)}
+.method{margin:44px 0 0;max-width:760px;font:400 12px/1.8 var(--mono);color:var(--muted)}
+.method b{color:var(--ink);font-weight:700}
+
+footer{background:var(--ink);color:var(--slip)}
+.foot{width:100%;max-width:1280px;margin:0 auto;padding:56px var(--gut) 60px;display:grid;grid-template-columns:1fr auto;gap:28px;align-items:end}
+.foot .wm{font:900 clamp(40px,5vw,64px)/.9 var(--sans);font-stretch:62%;text-transform:uppercase;color:var(--lime);margin:0 0 18px}
+.foot p{margin:0;font-size:15px;line-height:1.6;color:#D9D3EE;max-width:560px}
+.foot .fine{margin-top:10px;font:400 11px/1.6 var(--mono);color:#8F88AA}
+.foot nav{display:flex;gap:10px}
+.foot nav a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;border:1.5px solid rgba(255,247,230,.3);padding:12px 16px;border-radius:3px;font:600 14px/1 var(--sans);letter-spacing:.04em}
+.foot nav a:hover{border-color:var(--lime);color:var(--lime)}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width:1180px){.stage{grid-template-columns:minmax(0,1fr) 452px;gap:40px}}
+@media (max-width:999px){
+  :root{--gut:40px}
+  .stage{grid-template-columns:minmax(0,1fr);gap:48px;padding-top:28px;padding-bottom:48px}
+  .slipwrap{width:100%;max-width:520px;justify-self:center}
+  .steps{grid-template-columns:minmax(0,1fr);gap:36px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stat:nth-child(3){padding-left:0;border-left:0}
+  .stat{padding-bottom:22px}
+}
+@media (max-width:600px){
+  :root{--gut:16px}
+  .bar{padding-top:18px}
+  .nav{gap:16px}
+  .hide-s{display:none}
+  .brand{white-space:nowrap}
+  .stage{padding-top:22px;gap:36px;padding-bottom:40px}
+  .sub{font-size:17px;margin-top:18px}
+  .judge{margin-top:24px}
+  .search input{font-size:13.5px;padding:0 12px}
+  .go{padding:0 16px;font-size:17px}
+  .chip{font-size:13px;padding:9px 10px}
+  .slipwrap{transform:rotate(.8deg)}
+  .slip{padding:22px 18px 38px;font-size:12px}
+  .stamp{left:50%;font-size:40px;bottom:72px}
+  .stamp.NO_SECOND_PRICE{font-size:30px}
+  .tape{flex-direction:column;height:auto}
+  .lab{flex-direction:row;align-items:center;justify-content:space-between;padding:10px 16px;box-shadow:none}
+  .lab time{margin-top:0}
+  .lab{font-size:14px}
+  .lab time{white-space:nowrap;margin-left:12px}
+  .track{flex:none;height:52px;padding-left:16px}
+  .sec{padding-top:72px;padding-bottom:72px}
+  .lead{font-size:17.5px}
+  .prompt{grid-template-columns:minmax(0,1fr);padding:20px}
+  .copy{justify-self:start}
+  .stat{padding-right:12px}
+  .stat+.stat{padding-left:14px}
+  .stat:nth-child(3){padding-left:0}
+  .stat .cap{font-size:13.5px}
+  .foot{grid-template-columns:minmax(0,1fr)}
+  .dist .m{font-size:10px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<header class="hero" id="top">
+  <div class="bar">
+    <a class="brand" href="#top"><span class="dot" aria-hidden="true"></span><span>Second Opinion<span class="hide-s"> · a PayBox plugin</span></span></a>
+    <nav class="nav" aria-label="Page">
+      <a class="hide-s" href="#how">How it works</a>
+      <a class="hide-s" href="#number">The number</a>
+      <a href="https://github.com/iamrobertmoore/second-opinion-paybox" target="_blank" rel="noopener">GitHub ↗</a>
+    </nav>
+  </div>
+
+  <div class="stage">
+    <div class="pitch">
+      <h1>Same bet.<br><em>Two prices.</em></h1>
+      <p class="sub">The same outcome often trades on World, Kalshi and Polymarket at once. World's price is usually close. About 1 in 10 is stretched. I built a PayBox plugin so your agent pays <b>a cent</b> to catch that one before it buys.</p>
+
+      <div class="judge">
+        <label class="jl" for="q">Try it free on a real World market</label>
+        <div class="search">
+          <input id="q" type="search" placeholder="Find a World market" autocomplete="off" spellcheck="false"
+            role="combobox" aria-expanded="false" aria-controls="sug" aria-autocomplete="list">
+          <button class="go" id="go" type="button">Check</button>
+          <ul id="sug" role="listbox" aria-label="Matching World markets" hidden></ul>
+        </div>
+        <div class="chips" role="group" aria-label="Quick picks">
+          <button class="chip" type="button" data-t="WXVENLEADER-26YE-MADURO">Maduro · Venezuela 2026</button>
+          <button class="chip" type="button" data-t="WXPRESWIN-28-GNEW">Newsom · 2028</button>
+          <button class="chip" type="button" data-t="WXPRESWIN-28-JVAN">Vance · 2028</button>
+          <button class="chip" type="button" data-t="WXNHL-26OCT21FLAOTT-FPAN">Panthers vs Senators</button>
+          <button class="chip" type="button" data-t="WXMANDA-26YE-NBIS">Nebius acquired</button>
+          <button class="chip" type="button" data-t="WXSPACEXLAUNCH-26YE-140TO159">SpaceX 140-159 launches</button>
+        </div>
+        <p class="note">This preview is free and needs no wallet. It asks Kalshi and Polymarket live, and uses World's price from my last snapshot (<span class="snap-t">16 Oct, 11:43 UTC</span>). Inside PayBox, your agent sends World's live price and pays <b>0.01 USDC</b>.</p>
+      </div>
+    </div>
+
+    <div class="slipwrap">
+      <article class="slip" id="slip" aria-label="Second Opinion receipt">
+        <div class="h"><span>SECOND OPINION</span><span id="no" class="num">#0000</span></div>
+        <div class="meta" id="meta">Waiting for a market</div>
+        <div class="q"><span class="ev" id="ev">World market</span><b id="oc">Pick one on the left</b></div>
+        <div class="ruler" id="ruler">
+          <div class="axis"></div>
+          <div class="ticks" id="ticks"></div>
+          <div id="marks"></div>
+          <div class="dim" id="dim"></div>
+          <div class="diml" id="diml"></div>
+        </div>
+        <div id="vrows">
+          <div class="row"><span class="k">WORLD</span><span class="d"></span><span class="v soft">...</span></div>
+          <div class="row"><span class="k">KALSHI</span><span class="d"></span><span class="v soft">...</span></div>
+          <div class="row"><span class="k">POLYMARKET</span><span class="d"></span><span class="v soft">...</span></div>
+        </div>
+        <div class="rule"></div>
+        <div class="row tot"><span class="k">PREMIUM</span><span class="d"></span><span class="v soft" id="vprem">...</span></div>
+        <div class="row usual"><span class="k">WORLD'S USUAL</span><span class="d"></span><span class="v" id="vusual">0.56¢ MEDIAN</span></div>
+        <div class="row tot"><span class="k">VERDICT</span><span class="d"></span><span class="v soft" id="vverd">...</span></div>
+        <div class="rule"></div>
+        <dl class="settle">
+          <dt>RULES</dt><dd class="clamp" id="srules">World's own resolution text appears here.</dd>
+          <dt>ORACLE</dt><dd id="sorac">Chainlink data, 5-minute dispute window</dd>
+          <dt>CLOSES</dt><dd id="sclose">...</dd>
+        </dl>
+        <p class="pay" id="spay">Free preview · World price from snapshot<br>In PayBox: live World price, 0.01 USDC on Base</p>
+        <div class="stamp" id="stamp" aria-hidden="true"></div>
+      </article>
+    </div>
+  </div>
+
+  <div class="tape" aria-label="Most stretched World prices at the last scan">
+    <div class="lab"><span>Most stretched at last scan</span><time id="tapeT" class="num">11:43 UTC</time></div>
+    <div class="track" id="track"><span class="wait">Loading the last scan...</span></div>
+  </div>
+</header>
+
+<p class="sr" id="live" aria-live="polite"></p>
+
+<main>
+  <section class="sec" id="how" aria-labelledby="how-h">
+    <div class="eyebrow">01 · Inside PayBox</div>
+    <h2 id="how-h">How your agent<br>uses it</h2>
+    <p class="lead">Second Opinion is a PayBox plugin. Your agent calls it right before it buys a YES on World. It costs one cent and takes a couple of seconds.</p>
+    <ol class="steps">
+      <li class="step">
+        <div class="n">STEP 1</div>
+        <h3>Find the outcome</h3>
+        <p>Your agent finds the market and its live YES price with PayBox's World plugin.</p>
+      </li>
+      <li class="step">
+        <div class="n">STEP 2</div>
+        <h3>Ask for a second opinion</h3>
+        <p>It calls Second Opinion's <code>second_opinion</code> tool with the World ticker and that price.</p>
+<pre><span class="t">second_opinion</span>({
+  world_ticker: <span class="s">"WXPRESWIN-28-GNEW"</span>,
+  world_yes_ask: <span class="s">0.1055</span>
+})</pre>
+      </li>
+      <li class="step">
+        <div class="n">STEP 3</div>
+        <h3>Approve one cent</h3>
+        <p>PayBox shows a 0.01 USDC approval. You approve with your passkey. The receipt comes back, and the agent buys, waits, or sets a lower price.</p>
+        <div class="appr" aria-hidden="true"><div><b>0.01 USDC</b> on Base<br>to Second Opinion</div><span>Passkey</span></div>
+      </li>
+    </ol>
+    <div class="prompt">
+      <span class="pk">Say this to your agent</span>
+      <p id="ptext">Before you buy Newsom YES on World, get a Second Opinion.</p>
+      <button class="copy" id="copy" type="button">Copy</button>
+    </div>
+  </section>
+
+  <section class="sec numsec" id="number" aria-labelledby="num-h">
+    <div class="eyebrow">02 · Measured, not guessed</div>
+    <h2 id="num-h">The number</h2>
+    <p class="lead">I matched every World outcome I could to the same outcome on Kalshi or Polymarket. Then I measured how far World's YES price sat above the cheapest one. Most of the time the gap is small.</p>
+    <div class="stats">
+      <div class="stat"><span class="big" data-b="n">816</span><span class="cap">World outcomes matched</span></div>
+      <div class="stat"><span class="big" data-b="med">0.56¢</span><span class="cap">median premium</span></div>
+      <div class="stat"><span class="big" data-b="p90">1.59¢</span><span class="cap">90th percentile</span></div>
+      <div class="stat"><span class="big red">1 in 10</span><span class="cap">prices stretched past that</span></div>
+    </div>
+    <figure class="dist" aria-label="World's premium over the cheapest other venue">
+      <div class="axislbl" aria-hidden="true"><span style="left:0">0¢</span><span style="left:33.33%">1¢</span><span style="left:66.67%">2¢</span><span style="left:100%">3¢+</span></div>
+      <div class="bar2" aria-hidden="true"><div class="z1" style="width:53%"></div><div class="z2" style="width:47%"></div></div>
+      <div class="marks" aria-hidden="true">
+        <div class="m" style="left:18.67%"><b>0.56¢</b>median</div>
+        <div class="m r" style="left:53%"><b>1.59¢</b>90th pct</div>
+      </div>
+      <figcaption>World's YES premium over the cheapest other venue, in cents. Past the red line is roughly where Second Opinion starts to say STRETCHED.</figcaption>
+    </figure>
+    <p class="method"><b>Method.</b> World quotes come from the PayBox World plugin. Kalshi and Polymarket quotes come from their public APIs. I only compare the same outcome with the same resolution period. Snapshot <span class="snap-full">16 Oct 2026, 11:43 UTC</span>.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="foot">
+    <div>
+      <p class="wm">Second Opinion</p>
+      <p>Built by Robert Moore for MoonPay Hackathons, Chapter 1. Built with AI coding agents.</p>
+      <p class="fine">A hackathon project. Not financial advice. Prices move between checks.</p>
+    </div>
+    <nav aria-label="Links">
+      <a href="https://github.com/iamrobertmoore/second-opinion-paybox" target="_blank" rel="noopener">GitHub ↗</a>
+      <a href="https://paybox.sh" target="_blank" rel="noopener">PayBox ↗</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const RM = matchMedia("(prefers-reduced-motion: reduce)");
+  const HINTS = {
+    "WXVENLEADER-26YE-MADURO": ["Venezuela Head of State (End of 2026)", "Nicolas Maduro"],
+    "WXPRESWIN-28-GNEW": ["2028 US Presidential Election Winner", "Gavin Newsom"],
+    "WXPRESWIN-28-JVAN": ["2028 US Presidential Election Winner", "J.D. Vance"],
+    "WXNHL-26OCT21FLAOTT-FPAN": ["FLA Panthers vs OTT Senators", "FLA Panthers"],
+    "WXMANDA-26YE-NBIS": ["Companies Acquired Before 2027", "Nebius Group"],
+    "WXSPACEXLAUNCH-26YE-140TO159": ["SpaceX Launches in 2026", "140-159"],
+  };
+  const MON = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  const pad = (n, l = 2) => String(n).padStart(l, "0");
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  const toDate = (s) => new Date(/^\d{4}-\d{2}-\d{2}$/.test(s) ? s + "T00:00:00Z" : s);
+  const fDate = (s) => { const d = toDate(s); return `${pad(d.getUTCDate())} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()}`; };
+  const fTime = (s) => { const d = toDate(s); return `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())} UTC`; };
+  const c2 = (v) => Number(v).toFixed(2) + "¢";
+  const signed = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(2) + "¢";
+  const snapOf = (src) => { const m = /(\d{4}-\d{2}-\d{2}T[\d:]+Z)/.exec(src || ""); return m ? m[1] : null; };
+
+  const el = {
+    slip: $("#slip"), no: $("#no"), meta: $("#meta"), ev: $("#ev"), oc: $("#oc"), ruler: $("#ruler"), ticks: $("#ticks"),
+    marks: $("#marks"), dim: $("#dim"), diml: $("#diml"), vrows: $("#vrows"), prem: $("#vprem"), usual: $("#vusual"),
+    verd: $("#vverd"), rules: $("#srules"), orac: $("#sorac"), close: $("#sclose"), pay: $("#spay"), stamp: $("#stamp"),
+    live: $("#live"), q: $("#q"), go: $("#go"), sug: $("#sug"), track: $("#track"), tapeT: $("#tapeT"),
+  };
+
+  let count = 0, run = 0, timers = [], last = null, layout = null;
+  const later = (fn, ms) => { if (RM.matches || !ms) fn(); else timers.push(setTimeout(fn, ms)); };
+  const stop = () => { timers.forEach(clearTimeout); timers = []; };
+  const fresh = (node, text, cls = "") => {
+    node.textContent = text;
+    node.className = "v " + cls;
+    void node.offsetWidth;
+    node.classList.add("fresh");
+  };
+
+  /* ---------- ruler ---------- */
+  function scaleFor(vals) {
+    const mn = Math.min(...vals), mx = Math.max(...vals);
+    const span = Math.max(mx - mn, 0.6);
+    const steps = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 25];
+    const step = steps.find((s) => (span * 1.4) / s <= 6) || 25;
+    let lo = Math.floor((mn - span * 0.16) / step) * step;
+    let hi = Math.ceil((mx + span * 0.16) / step) * step;
+    lo = Math.max(0, +lo.toFixed(4)); hi = Math.min(100, +hi.toFixed(4));
+    if (hi <= lo) hi = lo + step;
+    return { lo, hi, step, x: (v) => ((v - lo) / (hi - lo)) * 100 };
+  }
+  function drawTicks(s) {
+    const dec = Number.isInteger(s.step) ? 0 : Number.isInteger(+(s.step * 10).toFixed(6)) ? 1 : 2;
+    let h = "";
+    for (let v = s.lo, i = 0; v <= s.hi + 1e-6 && i < 20; v += s.step, i++) {
+      const x = s.x(v);
+      let t = v.toFixed(dec); if (dec) t = t.replace(/0+$/, "").replace(/\.$/, "");
+      h += `<i class="tick" style="left:${x}%"></i><span class="tl" style="left:${x}%">${t}¢</span>`;
+    }
+    el.ticks.innerHTML = h;
+  }
+  // Place labels in px so they never leave the slip, and stack them in two lanes when they would touch.
+  function placeLabels(instant) {
+    if (!layout) return;
+    const W = el.ruler.clientWidth;
+    const lanes = [[], []];
+    const order = [...layout.marks].sort((a, b) => (a.cls === "world" ? -1 : b.cls === "world" ? 1 : a.x - b.x));
+    for (const m of order) {
+      const w = m.label.offsetWidth;
+      const cx = (m.x / 100) * W;
+      const left = Math.max(0, Math.min(W - w, cx - w / 2));
+      const span = [left - 6, left + w + 6];
+      const hit = (lane) => lanes[lane].some((o) => !(span[1] < o[0] || span[0] > o[1]));
+      const lane = m.cls === "world" || !hit(0) ? 0 : 1;
+      lanes[lane].push(span);
+      m.left = left; m.lane = lane;
+    }
+    for (const m of layout.marks) {
+      if (instant) { m.label.style.transition = "none"; m.g.style.transition = "none"; }
+      m.label.style.top = m.lane ? "0px" : "28px";
+      m.g.style.setProperty("--lead", (m.lane ? 32 : 4) + "px");
+      if (m.placed) { m.label.style.left = m.left + "px"; m.g.style.left = m.x + "%"; }
+      if (instant) { void m.label.offsetWidth; m.label.style.transition = ""; m.g.style.transition = ""; }
+    }
+    placeDim();
+  }
+  function placeDim() {
+    const d = layout && layout.dim;
+    if (!d) { el.dim.style.display = el.diml.style.display = "none"; return; }
+    el.dim.style.display = el.diml.style.display = "";
+    const a = Math.min(d.xw, d.xb), b = Math.max(d.xw, d.xb);
+    el.dim.style.left = a + "%";
+    el.dim.style.width = Math.max(b - a, 0.6) + "%";
+    el.dim.style.transformOrigin = d.xw >= d.xb ? "right" : "left";
+    const W = el.ruler.clientWidth, w = el.diml.offsetWidth;
+    const cx = (((a + b) / 2) / 100) * W;
+    el.diml.style.left = Math.max(w / 2, Math.min(W - w / 2, cx)) + "px";
+  }
+  function buildRuler(d) {
+    const w = d.world.yes_ask_cents;
+    const quoted = d.venues.filter((v) => v.status === "quoted" && v.yes_ask_cents != null);
+    const s = scaleFor([w, ...quoted.map((v) => v.yes_ask_cents)]);
+    el.ruler.className = "ruler v-" + d.verdict;
+    for (const n of [el.dim, el.diml]) { n.style.transition = "none"; n.classList.remove("on"); void n.offsetWidth; n.style.transition = ""; }
+    drawTicks(s);
+    el.marks.innerHTML = "";
+    const mk = (cls, name, cents) => {
+      const g = document.createElement("div");
+      g.className = "mk " + cls;
+      g.innerHTML = '<i class="lead"></i><i class="pin"></i>';
+      const label = document.createElement("div");
+      label.className = "pl " + cls;
+      label.innerHTML = `${esc(name)}<b>${c2(cents)}</b>`;
+      el.marks.append(g, label);
+      return { g, label, cls, x: s.x(cents), cents };
+    };
+    const marks = [mk("world", "World", w)];
+    quoted.forEach((v) => marks.push(mk("other", v.venue, v.yes_ask_cents)));
+    const best = quoted.slice().sort((a, b) => a.yes_ask_cents - b.yes_ask_cents)[0];
+    layout = { s, marks, dim: best ? { xw: s.x(w), xb: s.x(best.yes_ask_cents) } : null };
+    el.diml.textContent = best ? signed(d.premium_cents ?? w - best.yes_ask_cents) : "";
+    // start: everything sits on World's mark, hidden
+    const W = el.ruler.clientWidth;
+    placeLabels(true);
+    for (const m of marks) {
+      m.g.style.transition = m.label.style.transition = "none";
+      m.g.style.left = marks[0].x + "%";
+      m.label.style.left = Math.max(0, Math.min(W - m.label.offsetWidth, (marks[0].x / 100) * W - m.label.offsetWidth / 2)) + "px";
+      m.g.style.opacity = m.label.style.opacity = "0";
+      void m.g.offsetWidth;
+      m.g.style.transition = m.label.style.transition = "";
+    }
+  }
+  function reveal(m) {
+    m.placed = true;
+    m.g.style.opacity = m.label.style.opacity = "1";
+    m.g.style.left = m.x + "%";
+    m.label.style.left = m.left + "px";
+  }
+
+  /* ---------- receipt states ---------- */
+  function rowsHTML(items) {
+    return items.map(([k, v, cls]) => `<div class="row"><span class="k">${k}</span><span class="d"></span><span class="v ${cls || ""}">${esc(v)}</span></div>`).join("");
+  }
+  function dropStamp(off) {
+    el.stamp.style.transition = "none";
+    el.stamp.classList.remove("on");
+    void el.stamp.offsetWidth;
+    el.stamp.style.transition = "";
+    if (off) el.stamp.className = "stamp";
+  }
+  function loading(ticker, hint) {
+    stop(); dropStamp(true);
+    el.slip.classList.add("busy");
+    el.meta.textContent = "Asking Kalshi and Polymarket...";
+    el.ev.textContent = hint ? hint[0] : "World market";
+    el.oc.textContent = (hint ? hint[1] : ticker) + " · YES";
+    el.vrows.innerHTML = rowsHTML([["WORLD", "snapshot", "soft wait"], ["KALSHI", "asking", "soft wait"], ["POLYMARKET", "asking", "soft wait"]]);
+    for (const n of [el.prem, el.verd]) { n.textContent = "..."; n.className = "v soft wait"; }
+    el.dim.classList.remove("on"); el.diml.classList.remove("on");
+    el.marks.querySelectorAll(".mk,.pl").forEach((n) => (n.style.opacity = ".2"));
+    el.ticks.style.opacity = ".35";
+    el.live.textContent = `Checking ${hint ? hint[1] : ticker}.`;
+  }
+  function failed(msg) {
+    el.slip.classList.remove("busy");
+    el.meta.textContent = "No answer";
+    el.vrows.innerHTML = rowsHTML([["WORLD", "-", "soft"], ["KALSHI", "-", "soft"], ["POLYMARKET", "-", "soft"]]);
+    el.prem.textContent = "-"; el.prem.className = "v soft";
+    el.verd.textContent = "TRY AGAIN"; el.verd.className = "v soft";
+    el.rules.textContent = msg || "I could not reach the check. Try again in a moment.";
+    el.marks.innerHTML = ""; el.ticks.innerHTML = ""; el.ticks.style.opacity = "1"; layout = null; placeDim();
+    el.live.textContent = "The check did not come back. Try again.";
+  }
+
+  const VERDICT_ROW = {
+    STRETCHED: (d) => [`WAIT · BUY ≤ ${Number(d.buy_at_or_below_cents).toFixed(1)}¢`, "bad"],
+    FAIR_PRICE: () => ["FAIR · OK TO BUY", ""],
+    BEST_PRICE: () => ["BEST · BUY HERE", "good"],
+    NO_SECOND_PRICE: () => ["NOTHING TO COMPARE", "soft"],
+  };
+  const STAMP = { STRETCHED: "Stretched", FAIR_PRICE: "Fair price", BEST_PRICE: "Best price", NO_SECOND_PRICE: "No second price" };
+  const statusText = (v) => v.status === "not_listed" ? "not listed" : "no quote";
+
+  function show(d) {
+    last = d;
+    count++;
+    el.slip.classList.remove("busy");
+    el.no.textContent = "#" + pad(count, 4);
+    const quoted = d.venues.filter((v) => v.status === "quoted");
+    el.meta.textContent = `${fDate(d.checked_at)} · ${fTime(d.checked_at)} · ${quoted.length} of ${d.venues.length} venues quoted`;
+    el.ev.textContent = d.market.event;
+    el.oc.textContent = d.market.outcome + " · YES";
+    el.ticks.style.opacity = "1";
+    buildRuler(d);
+
+    // rows: World first, then each venue as it "answers"
+    el.vrows.innerHTML = rowsHTML([["WORLD", "", ""], ...d.venues.map((v) => [
+      v.url ? `<a href="${esc(v.url)}" target="_blank" rel="noopener">${esc(v.venue.toUpperCase())}</a>` : esc(v.venue.toUpperCase()), "", ""])]);
+    const vals = el.vrows.querySelectorAll(".v");
+    vals.forEach((n) => { n.textContent = ""; });
+    for (const n of [el.prem, el.verd]) { n.textContent = ""; n.className = "v"; }
+
+    const snap = snapOf(d.world.source);
+    el.rules.textContent = d.settlement.world_rules || "See World's market page.";
+    const orac = /chainlink/i.test(d.settlement.oracle || "") ? "Chainlink data" : (d.settlement.oracle || "World");
+    el.orac.textContent = d.settlement.dispute_window_minutes ? `${orac}, ${d.settlement.dispute_window_minutes}-minute dispute window` : orac;
+    el.close.textContent = d.market.closes ? fDate(d.market.closes) : "Open";
+    el.pay.innerHTML = snap
+      ? `Free preview · World price from snapshot ${esc(fTime(snap))}<br>In PayBox: live World price, 0.01 USDC on Base`
+      : `World price from ${esc(d.world.source)}<br>In PayBox: 0.01 USDC on Base`;
+
+    const m = layout.marks;
+    later(() => { reveal(m[0]); fresh(vals[0], c2(d.world.yes_ask_cents)); }, 60);
+    let t = 380, mi = 1;
+    d.venues.forEach((v, i) => {
+      const at = t, mark = v.status === "quoted" ? m[mi++] : null;
+      later(() => {
+        if (mark) reveal(mark);
+        if (v.status === "quoted") fresh(vals[i + 1], c2(v.yes_ask_cents));
+        else fresh(vals[i + 1], statusText(v), "soft");
+      }, at);
+      t += 340;
+    });
+    later(() => {
+      if (layout && layout.dim) { el.dim.classList.add("on"); el.diml.classList.add("on"); }
+      if (d.premium_cents == null) fresh(el.prem, "n/a", "soft");
+      else fresh(el.prem, `${signed(d.premium_cents)} (${d.premium_pct > 0 ? "+" : ""}${d.premium_pct}%)`,
+        d.verdict === "STRETCHED" ? "bad" : d.verdict === "BEST_PRICE" ? "good" : "");
+    }, t + 120);
+    later(() => { const [txt, cls] = (VERDICT_ROW[d.verdict] || VERDICT_ROW.NO_SECOND_PRICE)(d); fresh(el.verd, txt, cls); }, t + 420);
+    later(() => {
+      el.stamp.className = "stamp " + d.verdict;
+      el.stamp.textContent = STAMP[d.verdict] || d.verdict;
+      void el.stamp.offsetWidth;
+      el.stamp.classList.add("on");
+      el.live.textContent = `${STAMP[d.verdict] || d.verdict}. ${d.line}`;
+    }, t + 860);
+    if (d.baseline) el.usual.textContent = `${Number(d.baseline.median_premium_cents).toFixed(2)}¢ MEDIAN`;
+  }
+
+  async function check(ticker, hint) {
+    ticker = String(ticker || "").trim().toUpperCase();
+    if (!ticker) return;
+    const my = ++run;
+    document.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.t === ticker)));
+    loading(ticker, hint || HINTS[ticker]);
+    let d;
+    try {
+      const r = await fetch("/api/preview?ticker=" + encodeURIComponent(ticker), { headers: { accept: "application/json" } });
+      d = await r.json();
+      if (!d.ok) throw new Error(d.message || "No matched World market for " + ticker + ".");
+    } catch (e) {
+      if (my === run) failed(e && e.message && !/fetch|JSON|network/i.test(e.message) ? e.message : null);
+      return;
+    }
+    if (my === run) show(d);
+  }
+  function bringReceipt() {
+    const r = el.slip.getBoundingClientRect();
+    if (r.top > innerHeight - 140 || r.bottom < 80) el.slip.scrollIntoView({ behavior: RM.matches ? "auto" : "smooth", block: "start" });
+  }
+
+  /* ---------- chips ---------- */
+  document.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => { closeSug(); check(c.dataset.t); bringReceipt(); }));
+
+  /* ---------- search ---------- */
+  let items = [], idx = -1, qTimer = 0, qRun = 0;
+  function closeSug() { el.sug.hidden = true; el.q.setAttribute("aria-expanded", "false"); el.q.removeAttribute("aria-activedescendant"); idx = -1; }
+  function renderSug(list, text) {
+    items = list; idx = -1;
+    el.sug.innerHTML = list.length
+      ? list.map((r, i) => `<li role="option" id="opt-${i}" data-i="${i}" aria-selected="false"><b>${esc(r.outcome)}</b><span>${esc(r.event_title)}</span><code>${esc(r.ticker)}</code></li>`).join("")
+      : `<li class="empty" role="option" aria-disabled="true">No World market matches "${esc(text)}". Try a name, like Vance or Bitcoin.</li>`;
+    el.sug.hidden = false; el.q.setAttribute("aria-expanded", "true");
+  }
+  function highlight(i) {
+    const lis = el.sug.querySelectorAll("li[data-i]");
+    if (!lis.length) return;
+    idx = (i + lis.length) % lis.length;
+    lis.forEach((li, j) => li.setAttribute("aria-selected", String(j === idx)));
+    el.q.setAttribute("aria-activedescendant", "opt-" + idx);
+    lis[idx].scrollIntoView({ block: "nearest" });
+  }
+  function choose(r) {
+    if (!r) return;
+    el.q.value = r.outcome; closeSug();
+    check(r.ticker, [r.event_title, r.outcome]); bringReceipt();
+  }
+  async function search(text) {
+    const my = ++qRun;
+    try {
+      const r = await fetch("/api/preview?q=" + encodeURIComponent(text));
+      const d = await r.json();
+      if (my === qRun && el.q.value.trim() === text) renderSug(d.results || [], text);
+    } catch { if (my === qRun) renderSug([], text); }
+  }
+  function submit() {
+    const v = el.q.value.trim();
+    if (!v) { el.q.focus(); return; }
+    if (idx >= 0 && items[idx]) return choose(items[idx]);
+    if (/^WX[A-Z0-9-]{4,}$/i.test(v)) { closeSug(); check(v); bringReceipt(); return; }
+    if (items.length && !el.sug.hidden) return choose(items[0]);
+    clearTimeout(qTimer); search(v);
+  }
+  el.q.addEventListener("input", () => {
+    clearTimeout(qTimer);
+    const v = el.q.value.trim();
+    if (v.length < 2) { closeSug(); items = []; return; }
+    qTimer = setTimeout(() => search(v), 180);
+  });
+  el.q.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown") { e.preventDefault(); if (el.sug.hidden && items.length) { el.sug.hidden = false; el.q.setAttribute("aria-expanded", "true"); } highlight(idx + 1); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); highlight(idx - 1); }
+    else if (e.key === "Enter") { e.preventDefault(); submit(); }
+    else if (e.key === "Escape") closeSug();
+  });
+  el.go.addEventListener("click", submit);
+  el.sug.addEventListener("mousedown", (e) => {
+    const li = e.target.closest("li[data-i]");
+    if (li) { e.preventDefault(); choose(items[+li.dataset.i]); }
+  });
+  document.addEventListener("click", (e) => { if (!e.target.closest(".search")) closeSug(); });
+
+  /* ---------- tape from the last scan ---------- */
+  async function loadBoard() {
+    try {
+      const d = await (await fetch("/api/preview?board")).json();
+      const t = fTime(d.snapshot_utc);
+      el.tapeT.innerHTML = `<span class="hide-s">${fDate(d.snapshot_utc)} · </span>${t}`;
+      document.querySelectorAll(".snap-t").forEach((n) => (n.textContent = `${toDate(d.snapshot_utc).getUTCDate()} ${MON[toDate(d.snapshot_utc).getUTCMonth()].charAt(0) + MON[toDate(d.snapshot_utc).getUTCMonth()].slice(1).toLowerCase()}, ${t}`));
+      document.querySelectorAll(".snap-full").forEach((n) => (n.textContent = `${toDate(d.snapshot_utc).getUTCDate()} ${MON[toDate(d.snapshot_utc).getUTCMonth()].charAt(0) + MON[toDate(d.snapshot_utc).getUTCMonth()].slice(1).toLowerCase()} ${toDate(d.snapshot_utc).getUTCFullYear()}, ${t}`));
+      const b = d.baseline || {};
+      if (b.n) document.querySelector('[data-b="n"]').textContent = b.n;
+      if (b.median_premium_cents != null) document.querySelector('[data-b="med"]').textContent = Number(b.median_premium_cents).toFixed(2) + "¢";
+      if (b.p90_premium_cents != null) document.querySelector('[data-b="p90"]').textContent = Number(b.p90_premium_cents).toFixed(2) + "¢";
+      const rows = (d.rows || []).filter((r) => r.premium_cents != null);
+      if (!rows.length) { el.track.innerHTML = '<span class="wait">No stretched prices at the last scan.</span>'; return; }
+      el.track.innerHTML = rows.map((r) => {
+        const p = r.premium_cents;
+        const tag = p > 0 ? `<span class="dn">+${p.toFixed(2)}¢</span>` : `<span class="up">World lower ${Math.abs(p).toFixed(2)}¢</span>`;
+        return `<button class="ti" type="button" data-t="${esc(r.ticker)}" data-e="${esc(r.event)}" data-o="${esc(r.outcome)}" title="Check ${esc(r.outcome)} now"><b>${esc(r.outcome)}</b><i>${esc(r.event)}</i><span>World ${c2(r.world_cents)} / ${esc(r.best_other)} ${c2(r.best_other_cents)}</span>${tag}</button>`;
+      }).join("");
+    } catch {
+      el.track.innerHTML = '<span class="wait">The last scan is not available right now.</span>';
+    }
+  }
+  el.track.addEventListener("click", (e) => {
+    const b = e.target.closest(".ti");
+    if (!b) return;
+    check(b.dataset.t, [b.dataset.e, b.dataset.o]);
+    const r = el.slip.getBoundingClientRect();
+    if (r.top < 0 || r.top > innerHeight - 140) el.slip.scrollIntoView({ behavior: RM.matches ? "auto" : "smooth", block: "center" });
+  });
+
+  /* ---------- copy prompt ---------- */
+  const copyBtn = $("#copy");
+  copyBtn.addEventListener("click", async () => {
+    const text = $("#ptext").textContent.trim();
+    try { await navigator.clipboard.writeText(text); }
+    catch {
+      const r = document.createRange(); r.selectNodeContents($("#ptext"));
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      try { document.execCommand("copy"); } catch {}
+    }
+    copyBtn.textContent = "Copied";
+    setTimeout(() => (copyBtn.textContent = "Copy"), 1800);
+  });
+
+  /* ---------- resize keeps labels inside the slip ---------- */
+  let rz = 0;
+  addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => placeLabels(true), 120); });
+
+  loadBoard();
+  const start = () => check("WXPRESWIN-28-JVAN");
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(start, start); else start();
+})();
+</script>
+</body>
+</html>

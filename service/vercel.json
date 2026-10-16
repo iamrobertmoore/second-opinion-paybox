@@ -1,0 +1,4 @@
+{
+  "functions": { "api/*.js": { "includeFiles": "data/**", "maxDuration": 30 } },
+  "headers": [{ "source": "/(.*)", "headers": [{ "key": "x-robots-tag", "value": "noindex" }] }]
+}

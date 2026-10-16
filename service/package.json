@@ -1,0 +1,1 @@
+{ "name": "second-opinion-service", "private": true, "type": "module", "engines": { "node": "24.x" } }
