@@ -136,7 +136,7 @@ h1 em{font-style:normal;color:var(--lime);white-space:nowrap}
 .stamp.STRETCHED{color:var(--red);mix-blend-mode:multiply}
 .stamp.FAIR_PRICE{color:var(--green);mix-blend-mode:multiply}
 .stamp.BEST_PRICE{color:var(--slip);background:var(--green);border-color:var(--green);mix-blend-mode:multiply}
-.stamp.NO_SECOND_PRICE{color:var(--grey);font-size:36px;mix-blend-mode:multiply}
+.stamp.NO_SECOND_PRICE,.stamp.CHECK_RULES{color:var(--grey);font-size:36px;mix-blend-mode:multiply}
 
 /* ---------- TAPE ---------- */
 .tape{position:relative;z-index:2;display:flex;align-items:stretch;height:64px;background:var(--ink);border-top:3px solid var(--lime)}
@@ -281,7 +281,7 @@ footer{background:var(--ink);color:var(--slip)}
   <div class="stage">
     <div class="pitch">
       <h1>Same bet.<br><em>Two prices.</em></h1>
-      <p class="sub">The same outcome often trades on World, Kalshi and Polymarket at once. World's price is usually close. About 1 in 10 is stretched. I built a PayBox plugin so your agent pays <b>a cent</b> to catch that one before it buys.</p>
+      <p class="sub">The same outcome often trades on World, Kalshi and Polymarket at once. On most outcomes World is within about half a cent of the best price. I built a PayBox plugin so your agent pays <b>a cent</b> to catch the ones that aren't, before it buys.</p>
 
       <div class="judge">
         <label class="jl" for="q">Try it free on a real World market</label>
@@ -292,12 +292,11 @@ footer{background:var(--ink);color:var(--slip)}
           <ul id="sug" role="listbox" aria-label="Matching World markets" hidden></ul>
         </div>
         <div class="chips" role="group" aria-label="Quick picks">
-          <button class="chip" type="button" data-t="WXVENLEADER-26YE-MADURO">Maduro · Venezuela 2026</button>
-          <button class="chip" type="button" data-t="WXPRESWIN-28-GNEW">Newsom · 2028</button>
           <button class="chip" type="button" data-t="WXPRESWIN-28-JVAN">Vance · 2028</button>
-          <button class="chip" type="button" data-t="WXNHL-26OCT21FLAOTT-FPAN">Panthers vs Senators</button>
-          <button class="chip" type="button" data-t="WXMANDA-26YE-NBIS">Nebius acquired</button>
-          <button class="chip" type="button" data-t="WXSPACEXLAUNCH-26YE-140TO159">SpaceX 140-159 launches</button>
+          <button class="chip" type="button" data-t="WXPRESWIN-28-GNEW">Newsom · 2028</button>
+          <button class="chip" type="button" data-t="WXNFLCHAMP-26-SERS">49ers · Super Bowl</button>
+          <button class="chip" type="button" data-t="WXLAMAYOR-26-BASS">Karen Bass · LA mayor</button>
+          <button class="chip" type="button" data-t="WXPRESWIN-28-JOSS">Ossoff · 2028</button>
         </div>
         <p class="note">This preview is free and needs no wallet. It asks Kalshi and Polymarket live, and uses World's price from my last snapshot (<span class="snap-t">16 Oct, 11:43 UTC</span>). Inside PayBox, your agent sends World's live price and pays <b>0.01 USDC</b>.</p>
       </div>
@@ -383,21 +382,21 @@ footer{background:var(--ink);color:var(--slip)}
     <h2 id="num-h">The number</h2>
     <p class="lead">I matched every World outcome I could to the same outcome on Kalshi or Polymarket. Then I measured how far World's YES price sat above the cheapest one. Most of the time the gap is small.</p>
     <div class="stats">
-      <div class="stat"><span class="big" data-b="n">816</span><span class="cap">World outcomes matched</span></div>
+      <div class="stat"><span class="big" data-b="n">793</span><span class="cap">World outcomes matched</span></div>
       <div class="stat"><span class="big" data-b="med">0.56¢</span><span class="cap">median premium</span></div>
-      <div class="stat"><span class="big" data-b="p90">1.59¢</span><span class="cap">90th percentile</span></div>
-      <div class="stat"><span class="big red">1 in 10</span><span class="cap">prices stretched past that</span></div>
+      <div class="stat"><span class="big" data-b="p90">1.56¢</span><span class="cap">90th percentile</span></div>
+      <div class="stat"><span class="big red" data-b="two">49</span><span class="cap">outcomes 2¢ or more over</span></div>
     </div>
     <figure class="dist" aria-label="World's premium over the cheapest other venue">
       <div class="axislbl" aria-hidden="true"><span style="left:0">0¢</span><span style="left:33.33%">1¢</span><span style="left:66.67%">2¢</span><span style="left:100%">3¢+</span></div>
-      <div class="bar2" aria-hidden="true"><div class="z1" style="width:53%"></div><div class="z2" style="width:47%"></div></div>
+      <div class="bar2" aria-hidden="true"><div class="z1" style="width:52%"></div><div class="z2" style="width:48%"></div></div>
       <div class="marks" aria-hidden="true">
         <div class="m" style="left:18.67%"><b>0.56¢</b>median</div>
-        <div class="m r" style="left:53%"><b>1.59¢</b>90th pct</div>
+        <div class="m r" style="left:52%"><b>1.56¢</b>90th pct</div>
       </div>
       <figcaption>World's YES premium over the cheapest other venue, in cents. Past the red line is roughly where Second Opinion starts to say STRETCHED.</figcaption>
     </figure>
-    <p class="method"><b>Method.</b> World quotes come from the PayBox World plugin. Kalshi and Polymarket quotes come from their public APIs. I only compare the same outcome with the same resolution period. Snapshot <span class="snap-full">16 Oct 2026, 11:43 UTC</span>.</p>
+    <p class="method"><b>Method.</b> World quotes come from the PayBox World plugin. Kalshi and Polymarket quotes come from their public APIs. I only compare the same outcome with the same resolution period, and I leave out the 23 pairs where Kalshi and Polymarket disagree by more than 3¢, because that usually means the rules differ. Prices are YES asks before venue fees. Snapshot <span class="snap-full">16 Oct 2026, 11:43 UTC</span>.</p>
   </section>
 </main>
 
@@ -591,12 +590,13 @@ footer{background:var(--ink);color:var(--slip)}
   }
 
   const VERDICT_ROW = {
-    STRETCHED: (d) => [`WAIT · BUY ≤ ${Number(d.buy_at_or_below_cents).toFixed(1)}¢`, "bad"],
-    FAIR_PRICE: () => ["FAIR · OK TO BUY", ""],
-    BEST_PRICE: () => ["BEST · BUY HERE", "good"],
+    STRETCHED: (d) => [`WAIT OR LIMIT ≤ ${Number(d.buy_at_or_below_cents).toFixed(1)}¢`, "bad"],
+    FAIR_PRICE: () => ["FAIR PRICE", ""],
+    BEST_PRICE: () => ["BEST PRICE", "good"],
     NO_SECOND_PRICE: () => ["NOTHING TO COMPARE", "soft"],
+    CHECK_RULES: () => ["CHECK THE RULES", "soft"],
   };
-  const STAMP = { STRETCHED: "Stretched", FAIR_PRICE: "Fair price", BEST_PRICE: "Best price", NO_SECOND_PRICE: "No second price" };
+  const STAMP = { STRETCHED: "Stretched", FAIR_PRICE: "Fair price", BEST_PRICE: "Best price", NO_SECOND_PRICE: "No second price", CHECK_RULES: "Check rules" };
   const statusText = (v) => v.status === "not_listed" ? "not listed" : "no quote";
 
   function show(d) {
@@ -750,6 +750,7 @@ footer{background:var(--ink);color:var(--slip)}
       const b = d.baseline || {};
       if (b.n) document.querySelector('[data-b="n"]').textContent = b.n;
       if (b.median_premium_cents != null) document.querySelector('[data-b="med"]').textContent = Number(b.median_premium_cents).toFixed(2) + "¢";
+      if (b.two_cents_or_more != null) document.querySelector('[data-b="two"]').textContent = b.two_cents_or_more;
       if (b.p90_premium_cents != null) document.querySelector('[data-b="p90"]').textContent = Number(b.p90_premium_cents).toFixed(2) + "¢";
       const rows = (d.rows || []).filter((r) => r.premium_cents != null);
       if (!rows.length) { el.track.innerHTML = '<span class="wait">No stretched prices at the last scan.</span>'; return; }

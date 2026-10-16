@@ -36,7 +36,7 @@ const boardRow = z.object({
 
 function createServer() {
   const server = new McpServer(
-    { name: "second-opinion", version: "1.1.0" },
+    { name: "second-opinion", version: "1.2.0" },
     { supportedProtocolVersions: [PROTOCOL_VERSION] },
   );
 
@@ -46,14 +46,13 @@ function createServer() {
       title: "Second Opinion: 1-cent price check (a data fee, not a trade)",
       description:
         "A 1-cent data fee, not a trade: nothing is bought or sold on World. " +
-        "Before buying a World prediction-market outcome, pay 0.01 USDC on Base for a second opinion. " +
-        "It checks the same outcome's live YES price on Kalshi and Polymarket, compares World's premium with World's usual premium " +
-        "(median about 0.56c across 816 matched outcomes), and returns a verdict: BEST_PRICE, FAIR_PRICE or STRETCHED, " +
-        "with a buy-at-or-below price when stretched, plus how the market settles. " +
-        "Get the market ticker and current YES ask from the World plugin first (world_search, then world_get_markets or world_orderbook), " +
-        "and pass the ask as a decimal (0.1055 for 10.55c). Returns an x402 payment proposal for the 0.01 USDC fee. " +
-        "The proposal expires in about four minutes: if the PayBox signing window is not visible, call reopen_signing_window with the returned request_id straight away, " +
-        "then poll get_request; the receipt arrives as the paid service response.",
+        "Before buying a World prediction-market outcome, pay 0.01 USDC on Base for a second opinion on its price. " +
+        "STEP 1: get the live YES ask from the World plugin first (world_search to find the market, then world_orderbook or world_get_markets for that exact ticker). " +
+        "STEP 2: call this tool with the ticker and that live ask as a decimal (0.1055 for 10.55c). " +
+        "STEP 3: this returns an x402 payment proposal for the 0.01 USDC fee and PayBox creates a request. Immediately call reopen_signing_window with that request_id " +
+        "so the PayBox approval panel is shown to the user, without waiting to be asked; the request expires in about four minutes. Then poll get_request until success. " +
+        "The paid response is the receipt: the same outcome's live YES ask on Kalshi and Polymarket, World's premium against World's usual premium " +
+        "(median 0.56c across 793 matched outcomes), and a verdict: BEST_PRICE, FAIR_PRICE, STRETCHED (with a limit price) or CHECK_RULES (the other venues disagree, so the rules may differ), plus how the market settles.",
       inputSchema: z
         .object({
           world_ticker: worldTicker,
@@ -61,8 +60,7 @@ function createServer() {
             .number()
             .gt(0)
             .lt(1)
-            .optional()
-            .describe("World's current YES ask as a decimal between 0 and 1. If omitted, the service uses its last World snapshot."),
+            .describe("World's live YES ask from the World plugin, as a decimal between 0 and 1 (0.1055 for 10.55c)."),
         })
         .strict(),
       outputSchema: x402OutputSchema,
@@ -71,14 +69,14 @@ function createServer() {
     async ({ world_ticker, world_yes_ask }) => {
       const url = new URL(`${SERVICE}/api/check`);
       url.searchParams.set("ticker", world_ticker);
-      if (world_yes_ask !== undefined) url.searchParams.set("world_ask", String(world_yes_ask));
+      url.searchParams.set("world_ask", String(world_yes_ask));
       const proposal = proposeX402({ chain: "eip155:8453", url: url.toString(), maxAmount: PRICE_ATOMIC, method: "GET" });
       return {
         ...proposal,
         content: [
           {
             type: "text" as const,
-            text: `Data fee only, not a trade: approve 0.01 USDC on Base for a Second Opinion price check on ${world_ticker}. Nothing is bought on World. If the signing window is not showing, reopen it now; the fee request expires in about four minutes. The receipt (World vs Kalshi vs Polymarket, verdict, settlement) comes back as the paid response.`,
+            text: `Data fee only, not a trade: 0.01 USDC on Base for a Second Opinion price check on ${world_ticker} at World's ask of ${Math.round(world_yes_ask * 10000) / 100}c. Nothing is bought on World. Next: call reopen_signing_window with this request's id now so the user sees the PayBox approval panel (it expires in about four minutes), then poll get_request; the receipt arrives as the paid response.`,
           },
         ],
       };

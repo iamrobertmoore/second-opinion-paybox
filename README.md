@@ -9,20 +9,28 @@ A PayBox plugin for World markets, built for MoonPay Hackathons, Chapter 1 (Pred
 
 ---
 
-The same outcome often trades on World, Kalshi and Polymarket at once. On 16 October I matched **816 live World outcomes** to the same outcome on the other two. World's price was usually close: a median of **0.56c** above the cheapest of the others. But about **1 in 10** was stretched, 1.6c or more over, up to **9.27c** on a single share.
+The same outcome often trades on World, Kalshi and Polymarket at once. On 16 October I matched **793 live World outcomes** to the same outcome on the other two. On most of them World was within about half a cent of the best price (a median of **0.56c**). But **49** were 2c or more over, and that is real money on a share that costs 10c.
 
-An agent buying on your behalf can't tell which kind of price it's looking at. So I built a PayBox plugin that lets it ask. It costs 0.01 USDC on Base, paid through PayBox with your approval, and it comes back with a receipt:
+An agent buying on your behalf can't tell a normal price from one of those. So I built a PayBox plugin that lets it ask. It costs 0.01 USDC on Base, paid through PayBox with your approval, and it comes back with a receipt:
 
 - World's price, Kalshi's and Polymarket's for the same outcome, side by side
 - World's premium, measured against World's own usual premium
-- a verdict the agent can act on: **BEST PRICE**, **FAIR PRICE** (go ahead) or **STRETCHED** (wait, or only buy at or below a given price)
+- a verdict the agent can act on: **BEST PRICE**, **FAIR PRICE**, or **STRETCHED** (worth waiting, or setting a limit at a given price). If Kalshi and Polymarket disagree by more than 3c, it says **CHECK RULES** instead, because that usually means the markets aren't quite the same question
 - how the market settles: the rules, Chainlink as the data source, the 5-minute dispute window, the close date
 
-Most of the time the answer is "fair, go ahead", and that is the point. The cent buys the one check in ten that saves you real money.
+Most of the time the answer is "fair price", and that is the point: World is a good place to trade, and the cent is cheap insurance for the times it isn't.
 
 ## Try it
 
 Open **[second-opinion-paybox.vercel.app](https://second-opinion-paybox.vercel.app)**. No wallet, no login. Pick a market or search for one, and the check runs live against Kalshi and Polymarket. The free page uses World's price from my last snapshot and says so on the receipt. Inside PayBox, your agent passes World's live price and pays the cent.
+
+## Install it in PayBox
+
+Second Opinion is submitted to the PayBox marketplace and pending review. Once it's listed:
+
+1. Open [app.paybox.sh/plugins](https://app.paybox.sh/plugins), find **Second Opinion** under Unofficial plugins and choose **Enable**.
+2. Make sure the **World** plugin is enabled too, and that your agent (Claude, ChatGPT or Grok) is connected to PayBox.
+3. Fund your EVM wallet with a little USDC on Base. Each check costs 0.01.
 
 ## How your agent uses it
 
@@ -58,17 +66,16 @@ Each one is a 10,000-unit (0.01) USDC transfer on Base from my PayBox wallet to 
 
 ## The number, and how I got it
 
-On 16 October at 11:43 UTC I pulled every active World market through PayBox's World plugin: 288 events and 928 markets. I matched each one to Kalshi and Polymarket only where the question, the outcome and the resolution period were clearly the same. Anything unsure was left out, including markets with different dates, different participants or different rules. That left **816 outcomes priced on World and at least one other venue**.
+On 16 October at 11:43 UTC I pulled every active World market through PayBox's World plugin: 288 events and 928 markets. I matched each one to Kalshi and Polymarket only where the question, the outcome and the resolution period were clearly the same. Anything unsure was left out, including markets with different dates, different participants or different rules. That gave 816 outcomes priced on World and at least one other venue. I then left out 23 where Kalshi and Polymarket disagreed with each other by more than 3c, since that usually means the rules differ, leaving **793**.
 
 | Measure | Value |
 |---|---|
-| Matched outcomes | 816 in 252 events |
-| Median World premium over the cheapest other venue | 0.56c (2.7%) |
-| 90th percentile | 1.59c |
-| Largest | 9.27c |
-| Outcomes 2c or more over | 59 |
+| Matched outcomes used | 793 |
+| Median World premium over the cheapest other venue | 0.56c |
+| 90th percentile | 1.56c |
+| Outcomes 2c or more over | 49 |
 
-These numbers set the verdicts. FAIR means the premium sits inside World's normal range. STRETCHED means it is above the 90th percentile (1.6c), or 1c or more and over 15% on top of the other venue's price.
+Prices are YES asks before venue fees. These numbers set the verdicts. FAIR means the premium sits inside World's normal range. STRETCHED means it is above about the 90th percentile (1.6c), or 1c or more and over 15% on top of the other venue's price.
 
 ## How it works
 
@@ -91,15 +98,15 @@ PayBox: you approve 0.01 USDC on Base ──> /api/check (Vercel)
 
 ## Limits, plainly
 
-- World's own API is behind bot protection, so World prices come from PayBox's World plugin. Inside PayBox that's live. On the free page it's my last snapshot, and the receipt shows its time.
+- World prices come from PayBox's World plugin. Inside PayBox they're live. On the free page they come from my last snapshot, and the receipt shows its time.
 - The match index is a snapshot too. New World markets need a rebuild before they're covered.
-- In the Claude desktop app today, the PayBox payment panel sometimes only appears after the agent reopens the signing window. The tool's instructions tell the agent to do that straight away.
+- If the PayBox approval panel isn't showing, the tool's instructions have the agent call PayBox's `reopen_signing_window` straight away.
 - This is a price check, not financial advice.
 
 ## Built with
 
 PayBox (plugin runtime, World plugin, x402 payments) · x402 on Base · Kalshi and Polymarket public APIs · Vercel.
 
-I built this with AI coding agents, during the hackathon window. I chose the idea, approved the design, tested the payment flow with my own wallet and recorded the demo. One thing existed before the window opened at 13:00 BST on 16 October: the morning's research scan that matched World markets to Kalshi and Polymarket. Its scripts are in `indexer/`, and the 816-outcome numbers come from it.
+I built this with AI coding agents, during the hackathon window. I chose the idea, approved the design, tested the payment flow with my own wallet and recorded the demo. One thing existed before the window opened at 13:00 BST on 16 October: the morning's research scan that matched World markets to Kalshi and Polymarket. Its scripts are in `indexer/`, and the numbers above come from it.
 
 Robert Moore · [github.com/iamrobertmoore](https://github.com/iamrobertmoore)

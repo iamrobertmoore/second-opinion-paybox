@@ -13,6 +13,7 @@ export const SNAPSHOT_UTC = INDEX.snapshot_utc;
 
 // Thresholds. FAIR means within World's normal premium; STRETCHED means a premium a buyer should not pay.
 const STRETCH_CENTS = 1.6; // about the 90th percentile of World's premium over the best other venue
+const DISAGREE_CENTS = 3; // Kalshi and Polymarket this far apart usually means the rules differ
 const STRETCH_SHARE = 0.15; // or, from 1c up, more than 15% on top of the best other price
 const MIN_STRETCH_CENTS = 1.0; // the percentage test only applies from 1c up
 
@@ -86,23 +87,29 @@ export async function secondOpinion({ ticker, worldAsk, source }) {
   const quoted = [k, p].filter((v) => v.status === "quoted");
   const best = quoted.sort((a, b) => a.yes_ask - b.yes_ask)[0] || null;
   let verdict, line, limit = null, premium = null, premiumPct = null;
+  const both = quoted.length === 2 ? Math.abs(c(quoted[0].yes_ask - quoted[1].yes_ask)) : 0;
   if (!best) {
     verdict = "NO_SECOND_PRICE";
     line = "Nobody else is quoting this outcome right now, so there's nothing to compare. Use World's own spread as your guide.";
+  } else if (both > DISAGREE_CENTS) {
+    verdict = "CHECK_RULES";
+    premium = c(w - best.yes_ask);
+    premiumPct = Math.round(((w - best.yes_ask) / best.yes_ask) * 1000) / 10;
+    line = `Kalshi and Polymarket are ${Math.round(both * 100) / 100}c apart on this outcome, which usually means their rules differ. Read the rules below before trusting any gap.`;
   } else {
     premium = c(w - best.yes_ask);
     premiumPct = Math.round(((w - best.yes_ask) / best.yes_ask) * 1000) / 10;
     const fairCap = best.yes_ask + BASELINE.median_premium_cents / 100;
     if (premium <= 0) {
       verdict = "BEST_PRICE";
-      line = `World is at or below every other venue for this outcome (${c(w)}c vs ${c(best.yes_ask)}c on ${best.venue}). Good time to buy.`;
+      line = `World matches or beats the other venues on this outcome (${c(w)}c vs ${c(best.yes_ask)}c on ${best.venue}).`;
     } else if (premium <= STRETCH_CENTS && (premium < MIN_STRETCH_CENTS || premium / 100 <= best.yes_ask * STRETCH_SHARE)) {
       verdict = "FAIR_PRICE";
-      line = `World's price is ${premium}c above ${best.venue}, inside World's usual premium (median ${BASELINE.median_premium_cents}c). Fair to buy.`;
+      line = `World's price is ${premium}c above ${best.venue}, within World's usual premium (median ${BASELINE.median_premium_cents}c). A fair price.`;
     } else {
       verdict = "STRETCHED";
       limit = Math.round(fairCap * 1000) / 10;
-      line = `World is ${premium}c (${premiumPct}%) above ${best.venue}, well past its usual ${BASELINE.median_premium_cents}c. Wait, or only buy at ${limit}c or less.`;
+      line = `World is ${premium}c (${premiumPct}%) above ${best.venue}, well past its usual ${BASELINE.median_premium_cents}c. Worth waiting, or setting a limit at ${limit}c.`;
     }
   }
   return {
@@ -115,6 +122,7 @@ export async function secondOpinion({ ticker, worldAsk, source }) {
     verdict, line, premium_cents: premium, premium_pct: premiumPct, buy_at_or_below_cents: limit,
     baseline: { median_premium_cents: BASELINE.median_premium_cents, p90_premium_cents: BASELINE.p90_premium_cents,
       measured_on: `${BASELINE.n} matched World outcomes, ${SNAPSHOT_UTC}` },
+    note: "YES asks before venue fees. A price check, not financial advice.",
     settlement: { world_rules: m.rules, oracle: m.oracle === "chainlink" ? "Chainlink data, written on chain by World" : "World",
       dispute_window_minutes: m.dispute_window_s ? Math.round(m.dispute_window_s / 60) : null,
       kalshi_rules: k.rules || null },
@@ -124,7 +132,7 @@ export async function secondOpinion({ ticker, worldAsk, source }) {
 export function board(limit = 12) {
   // From the index snapshot: the most stretched World prices when it was built. Live checks may differ.
   const rows = INDEX.markets
-    .filter((m) => m.snap && m.snap.spread_cents > 0)
+    .filter((m) => m.snap && m.snap.spread_cents > 0 && !m.venues_disagree && m.snap.kalshi_ask && m.snap.poly_ask && !m.event.startsWith("WXARREST"))
     .sort((a, b) => b.snap.spread_cents - a.snap.spread_cents)
     .slice(0, limit)
     .map((m) => ({ ticker: m.ticker, event: m.event_title, outcome: m.outcome, world_cents: c(m.world_yes_ask),

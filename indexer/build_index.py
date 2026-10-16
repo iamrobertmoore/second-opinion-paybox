@@ -16,6 +16,14 @@ def render_rules(r):
         t = t.replace("{" + k + "}", str(v.get("value", "")) if isinstance(v, dict) else str(v))
     return re.sub(r"\s+", " ", t).strip()[:600]
 
+def fnum(x):
+    try:
+        return float(x)
+    except (TypeError, ValueError):
+        return None
+
+DISAGREE = 0.03  # Kalshi and Polymarket more than 3c apart: likely different rules, left out of the baseline
+
 markets, prem = [], []
 for r in rows:
     t = r["world_market"]; e = ev.get(r["world_event"], {}); ru = rules.get(t, {})
@@ -31,14 +39,19 @@ for r in rows:
         "rules": render_rules(ru), "dispute_window_s": ru.get("disputeWindowSeconds"),
         "oracle": "chainlink" if (ru.get("metadata") or {}).get("chainlink_market_id") else None,
         "volume24h_raw": int(e.get("volume24h") or 0),
-        "snap": {"best_other": r["best_other_venue"], "best_other_ask": float(r["best_other_yes_ask"]), "spread_cents": float(r["spread_cents"])},
+        "snap": {"best_other": r["best_other_venue"], "best_other_ask": float(r["best_other_yes_ask"]), "spread_cents": float(r["spread_cents"]),
+                 "kalshi_ask": fnum(r["kalshi_yes_ask"]), "poly_ask": fnum(r["poly_yes_ask"])},
     })
-    prem.append(float(r["spread_cents"]))
+    k_, p_ = fnum(r["kalshi_yes_ask"]), fnum(r["poly_yes_ask"])
+    markets[-1]["venues_disagree"] = bool(k_ and p_ and abs(k_ - p_) > DISAGREE)
+    if not markets[-1]["venues_disagree"]:
+        prem.append(float(r["spread_cents"]))
 prem.sort()
 q = lambda f: prem[min(len(prem) - 1, int(f * len(prem)))]
 out = {"snapshot_utc": W["snapshot_utc"], "count": len(markets),
        "baseline": {"median_premium_cents": round(statistics.median(prem), 3), "p90_premium_cents": round(q(0.9), 3),
-                    "share_cheaper_elsewhere": round(sum(1 for x in prem if x > 0) / len(prem), 4), "n": len(prem)},
+                    "two_cents_or_more": sum(1 for x in prem if x >= 2), "largest_cents": round(max(prem), 2), "n": len(prem),
+                    "excluded_rules_mismatch": len(markets) - len(prem)},
        "markets": markets}
 json.dump(out, open(OUT, "w"), separators=(",", ":"))
 print(out["count"], out["baseline"], round(len(json.dumps(out)) / 1024), "KiB")
