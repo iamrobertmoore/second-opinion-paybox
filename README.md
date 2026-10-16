@@ -9,7 +9,7 @@ A PayBox plugin for World markets, built for MoonPay Hackathons, Chapter 1 (Pred
 
 ---
 
-The same outcome often trades on World, Kalshi and Polymarket at once. On 16 October I matched **793 live World outcomes** to the same outcome on the other two. On most of them World was within about half a cent of the best price (a median of **0.56c**). But **49** were 2c or more over, and that is real money on a share that costs 10c.
+The same outcome often trades on World, Kalshi and Polymarket at once. On 16 October I matched **793 live World outcomes** to the same outcome on the other two. On most of them World was within about half a cent of the best price (a median of **0.56c**). But **49** were 2c or more over. On a 10c share, 2c is a 20% markup.
 
 An agent buying on your behalf can't tell a normal price from one of those. So I built a PayBox plugin that lets it ask. It costs 0.01 USDC on Base, paid through PayBox with your approval, and it comes back with a receipt:
 
@@ -18,7 +18,7 @@ An agent buying on your behalf can't tell a normal price from one of those. So I
 - a verdict the agent can act on: **BEST PRICE**, **FAIR PRICE**, or **STRETCHED** (worth waiting, or setting a limit at a given price). If Kalshi and Polymarket disagree by more than 3c, it says **CHECK RULES** instead, because that usually means the markets aren't quite the same question
 - how the market settles: the rules, Chainlink as the data source, the 5-minute dispute window, the close date
 
-Most of the time the answer is "fair price", and that is the point: World is a good place to trade, and the cent is cheap insurance for the times it isn't.
+Most checks come back FAIR PRICE, because on most outcomes World is priced in line with the other two. You pay the cent to catch the ones where it isn't.
 
 ## Try it
 
@@ -97,7 +97,7 @@ PayBox: you approve 0.01 USDC on Base ──> /api/check (Vercel)
 - `service/`: the paid endpoint, the free preview and the judge page, on Vercel. x402 v1 `exact` on Base, settled through a public facilitator.
 - `indexer/`: the matching scripts and the index build (`build_index.py`) that maps each World market to its Kalshi and Polymarket twin.
 
-## Limits, plainly
+## Limits
 
 - World prices come from PayBox's World plugin. Inside PayBox they're live. On the free page they come from my last snapshot, and the receipt shows its time.
 - The match index is a snapshot too. New World markets need a rebuild before they're covered.
@@ -108,6 +108,6 @@ PayBox: you approve 0.01 USDC on Base ──> /api/check (Vercel)
 
 PayBox (plugin runtime, World plugin, x402 payments) · x402 on Base · Kalshi and Polymarket public APIs · Vercel.
 
-I built this with AI coding agents, during the hackathon window. I chose the idea, approved the design, tested the payment flow with my own wallet and recorded the demo. One thing existed before the window opened at 13:00 BST on 16 October: the morning's research scan that matched World markets to Kalshi and Polymarket. Its scripts are in `indexer/`, and the numbers above come from it.
+I built this with AI coding agents during the hackathon window. I chose the idea, approved the design, tested the payment flow with my own wallet, and recorded the demo. The only work done before the window opened at 13:00 BST on 16 October is that morning's research scan, which matched World markets to Kalshi and Polymarket. Its scripts are in `indexer/`, and the numbers above come from it.
 
 Robert Moore · [github.com/iamrobertmoore](https://github.com/iamrobertmoore)
