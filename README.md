@@ -43,6 +43,7 @@ Second Opinion sits next to PayBox's own World plugin.
 2. It calls **Second Opinion's** `second_opinion` tool with that ticker and price.
 3. PayBox shows a **0.01 USDC** payment on Base. You approve it with your passkey.
 4. The receipt comes back in the chat. The agent buys, waits, or sets a lower price.
+5. If it buys, it does that through the World plugin too, and you approve the order in PayBox. World settles the market on Chainlink data, and the receipt has already told you those rules.
 
 Try this in Claude with the PayBox connector on:
 
@@ -68,6 +69,8 @@ Six real paid checks from my own PayBox account. In the last four, the agent too
 | 17 Oct 07:17 | Karen Bass YES, LA mayor: FAIR PRICE, World's live ask 47.75c vs 47c on Kalshi and Polymarket. After their taker fees, World is the cheapest | [`0xfe217631...3300`](https://basescan.org/tx/0xfe21763115c16c17f3c276e120affb8d9dbb875903b86f217e79d03479023300) |
 | 17 Oct 13:53 | Karen Bass YES: FAIR PRICE again, with the wallet set to ask for my approval in PayBox each time | [`0xfdfbb39b...5a70`](https://basescan.org/tx/0xfdfbb39b950e04fb0f84c2ce43216296d012b4e0e41750af7fac6b5895d85a70) |
 | 17 Oct 13:57 | Karen Bass YES: FAIR PRICE, same numbers, approved in PayBox | [`0xf926e239...4609`](https://basescan.org/tx/0xf926e2394f1e530ac8267e31634df9576fa66dddb8c5e47583bf13768fa64609) |
+
+**Check, then buy.** On 17 October at 13:54 UTC I asked Claude to get a Second Opinion on Karen Bass YES and, if it came back fair, buy $1 of it. The check came back FAIR PRICE (0xfdfbb39b above), and Claude then raised the $1 YES order through PayBox's World plugin from my Solana wallet. PayBox logged it as a `prediction_trade` request waiting for my approval (request `cfe77866`). It stopped there: World doesn't allow trading from the UK, where I am, so its region check wouldn't let me sign. Nothing was spent. From anywhere World trades, the same request is one more approval.
 
 Anyone can decode a payment from Base with `/api/verify`, for example [the Karen Bass run](https://second-opinion-paybox.vercel.app/api/verify?tx=0xfe21763115c16c17f3c276e120affb8d9dbb875903b86f217e79d03479023300). Each one is a 10,000-unit (0.01) USDC transfer on Base from my PayBox wallet (`0x011E...Ff29`) to the service's receiving address (`0x7BcA...c2c77`), settled through x402. The x402 facilitator submits it in a Multicall3 batch, so on Basescan the transaction's sender is the facilitator; the USDC transfer line shows my wallet paying.
 
@@ -130,6 +133,7 @@ PayBox: you approve 0.01 USDC on Base ──> /api/check (Vercel)
 
 - World prices come from PayBox's World plugin. Inside PayBox they're live. On the free page they come from my last snapshot, and the receipt shows its time.
 - The match index is a snapshot too. New World markets need a rebuild before they're covered.
+- World blocks trading from some countries, including the UK. Second Opinion's check works from anywhere, but the buy that follows it needs a region World serves.
 - If the PayBox approval panel isn't showing, the tool's instructions have the agent call PayBox's `reopen_signing_window` straight away.
 - The after-fees view uses Kalshi's and Polymarket's published taker-fee formulas as of 17 October. Venue fees change, and the verdict itself still compares YES asks.
 - This is a price check, not financial advice.

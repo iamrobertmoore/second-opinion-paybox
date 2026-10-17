@@ -48,6 +48,7 @@ Once PayBox approves the plugin, enable **Second Opinion** at [app.paybox.sh/plu
 | The plugin is submitted and passes PayBox's checks (3 tools) | Developer portal screenshot, 17 Oct | [docs/portal-submitted.png](docs/portal-submitted.png) |
 | Six checks were paid through PayBox, 0.01 USDC each, on Base | Base transactions, 16 and 17 Oct | `/api/verify?tx=...`, or Basescan |
 | In the last four runs the agent used World's live price from PayBox's World plugin | The receipts say `source: your agent (PayBox World plugin)`; recorded in the video | Video; receipt JSON in each run |
+| After a FAIR PRICE check, the agent raised the $1 buy through PayBox's World plugin | PayBox request `cfe77866` (`prediction_trade`, 17 Oct 13:54 UTC), stopped by World's UK region check before signing | README, "Check, then buy" |
 | The endpoint asks for payment and refuses unknown markets first | Live HTTP responses | The curl commands above |
 | Median World premium 0.56c, 49 of 793 at 2c or more | Measured on the 16 Oct 11:43 UTC snapshot | `indexer/`, `service/data/index.json` |
 | After the other venues' taker fees, World is cheapest on 408 of 793 | Computed from the same snapshot with the venues' published fee formulas | `service/lib/check.js` (`AFTER_FEES`) |
