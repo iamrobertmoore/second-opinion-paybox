@@ -222,7 +222,7 @@ h2{margin:16px 0 0;font:900 clamp(50px,6.6vw,86px)/.88 var(--sans);font-stretch:
 .portal{margin:40px 0 0;max-width:720px}.portal img{display:block;width:100%;height:auto;border-radius:6px;border:1.5px solid var(--ink)}.portal figcaption{margin-top:10px;font-size:14px;color:var(--ink-2)}
 .plinks{margin:28px 0 0;display:flex;flex-wrap:wrap;gap:12px}
 .plinks a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);border:1.5px solid var(--ink);padding:12px 16px;border-radius:3px;font:600 14px/1 var(--sans);letter-spacing:.04em}
-@media (max-width:760px){.fees{grid-template-columns:1fr}.fees div+div{padding-left:0;border-left:0;border-top:1px solid #CFC5AE}.proof td:nth-child(1),.proof th:nth-child(1){display:none}}
+@media (max-width:760px){.fees{grid-template-columns:1fr}.fees div+div{padding-left:0;border-left:0;border-top:1px solid #CFC5AE}.proof td:nth-child(1),.proof th:nth-child(1),.proof td:nth-child(5),.proof th:nth-child(5){display:none}}
 
 footer{background:var(--ink);color:var(--slip)}
 .foot{width:100%;max-width:1280px;margin:0 auto;padding:56px var(--gut) 60px;display:grid;grid-template-columns:1fr auto;gap:28px;align-items:end}
@@ -429,17 +429,18 @@ footer{background:var(--ink);color:var(--slip)}
     <h2 id="proof-h">Proof it runs</h2>
     <p class="lead">Real checks from my own PayBox account, paid in USDC on Base through x402. In the last two, my agent took World's live price from PayBox's World plugin first.</p>
     <table class="proof">
-      <thead><tr><th>UTC</th><th>Market</th><th>Verdict</th><th>Base transaction</th></tr></thead>
+      <thead><tr><th>UTC</th><th>Market</th><th>Verdict</th><th>Base transaction</th><th>Check</th></tr></thead>
       <tbody id="prows">
-        <tr><td>16 Oct 15:58</td><td>Newsom YES, 2028</td><td class="v bad">STRETCHED</td><td><a href="https://basescan.org/tx/0x970adb03a9dc0d1d82a8ac0756859547a96fe6d46348d807d7d0b913e3ed8b8a" target="_blank" rel="noopener">0x970adb03…8b8a</a></td></tr>
-        <tr><td>16 Oct 16:04</td><td>Newsom YES, 2028</td><td class="v bad">STRETCHED</td><td><a href="https://basescan.org/tx/0x872e1d3704220b05194f971c3b4902867c8fa31211dba69b9029db9efb754c3b" target="_blank" rel="noopener">0x872e1d37…4c3b</a></td></tr>
-        <tr><td>16 Oct 16:24</td><td>Newsom YES, 2028, live World ask</td><td class="v bad">STRETCHED</td><td><a href="https://basescan.org/tx/0xf46b8dc6db9cf368d478e1fca67ef41eb7b859d3169e06b4d980f4498020a6a7" target="_blank" rel="noopener">0xf46b8dc6…a6a7</a></td></tr>
-        <tr><td>17 Oct 07:17</td><td>Karen Bass YES, LA mayor, live World ask</td><td class="v ok">FAIR PRICE</td><td><a href="https://basescan.org/tx/0xfe21763115c16c17f3c276e120affb8d9dbb875903b86f217e79d03479023300" target="_blank" rel="noopener">0xfe217631…3300</a></td></tr>
+        <tr><td>16 Oct 15:58</td><td>Newsom YES, 2028</td><td class="v bad">STRETCHED</td><td><a href="https://basescan.org/tx/0x970adb03a9dc0d1d82a8ac0756859547a96fe6d46348d807d7d0b913e3ed8b8a" target="_blank" rel="noopener">0x970adb03…8b8a</a></td><td><a href="/api/verify?tx=0x970adb03a9dc0d1d82a8ac0756859547a96fe6d46348d807d7d0b913e3ed8b8a" target="_blank" rel="noopener">Check on Base</a></td></tr>
+        <tr><td>16 Oct 16:04</td><td>Newsom YES, 2028</td><td class="v bad">STRETCHED</td><td><a href="https://basescan.org/tx/0x872e1d3704220b05194f971c3b4902867c8fa31211dba69b9029db9efb754c3b" target="_blank" rel="noopener">0x872e1d37…4c3b</a></td><td><a href="/api/verify?tx=0x872e1d3704220b05194f971c3b4902867c8fa31211dba69b9029db9efb754c3b" target="_blank" rel="noopener">Check on Base</a></td></tr>
+        <tr><td>16 Oct 16:24</td><td>Newsom YES, 2028, live World ask</td><td class="v bad">STRETCHED</td><td><a href="https://basescan.org/tx/0xf46b8dc6db9cf368d478e1fca67ef41eb7b859d3169e06b4d980f4498020a6a7" target="_blank" rel="noopener">0xf46b8dc6…a6a7</a></td><td><a href="/api/verify?tx=0xf46b8dc6db9cf368d478e1fca67ef41eb7b859d3169e06b4d980f4498020a6a7" target="_blank" rel="noopener">Check on Base</a></td></tr>
+        <tr><td>17 Oct 07:17</td><td>Karen Bass YES, LA mayor, live World ask</td><td class="v ok">FAIR PRICE</td><td><a href="https://basescan.org/tx/0xfe21763115c16c17f3c276e120affb8d9dbb875903b86f217e79d03479023300" target="_blank" rel="noopener">0xfe217631…3300</a></td><td><a href="/api/verify?tx=0xfe21763115c16c17f3c276e120affb8d9dbb875903b86f217e79d03479023300" target="_blank" rel="noopener">Check on Base</a></td></tr>
       </tbody>
     </table>
     <figure class="portal"><img src="/portal-submitted.png" alt="PayBox developer portal: Second Opinion submitted, checks passed, 3 tools" loading="lazy" width="1239" height="935"><figcaption>Submitted in PayBox's developer portal, checks passed, 3 tools.</figcaption></figure>
     <div class="plinks">
       <a href="https://github.com/iamrobertmoore/second-opinion-paybox" target="_blank" rel="noopener">Code on GitHub ↗</a>
+      <a href="https://github.com/iamrobertmoore/second-opinion-paybox/blob/main/JUDGES.md" target="_blank" rel="noopener">For judges ↗</a>
     </div>
   </section>
 </main>

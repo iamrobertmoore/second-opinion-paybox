@@ -5,7 +5,7 @@
 <p align="center"><strong>Before your agent buys a prediction, it pays a cent for a second opinion.</strong><br>
 A PayBox plugin for World markets, built for MoonPay Hackathons, Chapter 1 (Predictions).</p>
 
-<p align="center"><a href="https://second-opinion-paybox.vercel.app">Try it on a real World market</a> · <a href="#how-your-agent-uses-it">Use it in PayBox</a> · <a href="#proof-it-runs-end-to-end">Proof it runs</a></p>
+<p align="center"><a href="https://second-opinion-paybox.vercel.app">Try it on a real World market</a> · <a href="#how-your-agent-uses-it">Use it in PayBox</a> · <a href="#proof-it-runs-end-to-end">Proof it runs</a> · <a href="JUDGES.md">For judges</a></p>
 
 ---
 
@@ -19,7 +19,9 @@ An agent buying on your behalf can't tell a normal price from one of those. So I
 - a verdict the agent can act on: **BEST PRICE**, **FAIR PRICE**, or **STRETCHED** (worth waiting, or only buying at a given price or less). BEST PRICE means World is at or below the cheapest other venue. If Kalshi and Polymarket disagree by more than 3c, it says **CHECK RULES** instead, because that usually means the markets aren't quite the same question
 - how the market settles, from World's own market data: the rules, the data source (Chainlink), the dispute window, the close date
 
-Most checks come back FAIR PRICE, because on most outcomes World is priced in line with the other two. You pay the cent to catch the ones where it isn't.
+Most checks come back FAIR PRICE, because on most outcomes World is priced in line with the other two. You pay the cent to catch the ones where it isn't. On the Newsom check below, a $100 buy that waits for 9.6c instead of paying 10.55c saves about $9, which is 900 times the fee.
+
+You can also make it a standing rule for your agent: *"Before any World buy, get a Second Opinion, and never buy what it calls STRETCHED."*
 
 ## Try it
 
@@ -65,7 +67,7 @@ Four real paid checks from my own PayBox account. In the last two, the agent too
 | 16 Oct 16:24 | Newsom YES 2028: STRETCHED, World's live ask 10.55c from the World plugin vs Kalshi 10.00c and Polymarket 9.00c | [`0xf46b8dc6...a6a7`](https://basescan.org/tx/0xf46b8dc6db9cf368d478e1fca67ef41eb7b859d3169e06b4d980f4498020a6a7) |
 | 17 Oct 07:17 | Karen Bass YES, LA mayor: FAIR PRICE, World's live ask 47.75c vs 47c on Kalshi and Polymarket. After their taker fees, World is the cheapest | [`0xfe217631...3300`](https://basescan.org/tx/0xfe21763115c16c17f3c276e120affb8d9dbb875903b86f217e79d03479023300) |
 
-Each one is a 10,000-unit (0.01) USDC transfer on Base from my PayBox wallet (`0x011E...Ff29`) to the service's receiving address (`0x7BcA...c2c77`), settled through x402. The x402 facilitator submits it in a Multicall3 batch, so on Basescan the transaction's sender is the facilitator; the USDC transfer line shows my wallet paying.
+Anyone can decode a payment from Base with `/api/verify`, for example [the Karen Bass run](https://second-opinion-paybox.vercel.app/api/verify?tx=0xfe21763115c16c17f3c276e120affb8d9dbb875903b86f217e79d03479023300). Each one is a 10,000-unit (0.01) USDC transfer on Base from my PayBox wallet (`0x011E...Ff29`) to the service's receiving address (`0x7BcA...c2c77`), settled through x402. The x402 facilitator submits it in a Multicall3 batch, so on Basescan the transaction's sender is the facilitator; the USDC transfer line shows my wallet paying.
 
 The plugin is submitted in PayBox's developer portal, with its checks passed and all 3 tools found:
 
