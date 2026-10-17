@@ -9,12 +9,13 @@ A PayBox plugin for World markets, built for MoonPay Hackathons, Chapter 1 (Pred
 
 ---
 
-The same outcome often trades on World, Kalshi and Polymarket at once. On 16 October I matched **793 live World outcomes** to the same outcome on the other two. On most of them World was within about half a cent of the best price (a median of **0.56c**). But **49** were 2c or more over. On a 10c share, 2c is a 20% markup.
+The same outcome often trades on World, Kalshi and Polymarket at once. On 16 October I matched **793 live World outcomes** to the same outcome on the other two. On most of them World was within about half a cent of the best price (a median of **0.56c**). But **49** were 2c or more over, and on those a buyer paid a median of about $20 more per $100 than on the cheaper venue.
 
 An agent buying on your behalf can't tell a normal price from one of those. So I built a PayBox plugin that lets it ask. It costs 0.01 USDC on Base, paid through PayBox with your approval, and it comes back with a receipt:
 
 - World's price, Kalshi's and Polymarket's for the same outcome, side by side
 - World's premium, measured against World's own usual premium
+- the same comparison after Kalshi's and Polymarket's taker fees (World doesn't add a separate fee)
 - a verdict the agent can act on: **BEST PRICE**, **FAIR PRICE**, or **STRETCHED** (worth waiting, or setting a limit at a given price). If Kalshi and Polymarket disagree by more than 3c, it says **CHECK RULES** instead, because that usually means the markets aren't quite the same question
 - how the market settles: the rules, Chainlink as the data source, the 5-minute dispute window, the close date
 
@@ -76,7 +77,15 @@ On 16 October at 11:43 UTC I pulled every active World market through PayBox's W
 | 90th percentile | 1.56c |
 | Outcomes 2c or more over | 49 |
 
-Prices are YES asks before venue fees. These numbers set the verdicts. FAIR means the premium sits inside World's normal range. STRETCHED means it is above about the 90th percentile (1.6c), or 1c or more and over 15% on top of the other venue's price.
+Prices are YES asks before venue fees, and these numbers set the verdicts. FAIR means the premium sits inside World's normal range. STRETCHED means it is above about the 90th percentile (1.6c), or 1c or more and over 15% on top of the other venue's price.
+
+Kalshi and Polymarket also charge buyers a taker fee: Kalshi 0.07 × p × (1 − p) per share, Polymarket its category rate (0.04 to 0.07) × p × (1 − p). World doesn't add a separate trading fee; its cost is in the quote. With those fees added, World is the cheapest venue on **408 of the 793** outcomes, the median premium is **−0.05c**, and **28** are still 2c or more over. Every receipt shows this after-fees view next to the verdict. (I used World's category for Polymarket's fee rate and left out Kalshi's rounding up to the cent per order.)
+
+| After the other venues' taker fees | Value |
+|---|---|
+| World cheapest | 408 of 793 |
+| Median World premium | −0.05c |
+| Outcomes 2c or more over | 28 |
 
 ## How it works
 
@@ -102,6 +111,7 @@ PayBox: you approve 0.01 USDC on Base ──> /api/check (Vercel)
 - World prices come from PayBox's World plugin. Inside PayBox they're live. On the free page they come from my last snapshot, and the receipt shows its time.
 - The match index is a snapshot too. New World markets need a rebuild before they're covered.
 - If the PayBox approval panel isn't showing, the tool's instructions have the agent call PayBox's `reopen_signing_window` straight away.
+- The after-fees view uses Kalshi's and Polymarket's published taker-fee formulas as of 17 October. Venue fees change, and the verdict itself still compares YES asks.
 - This is a price check, not financial advice.
 
 ## Built with

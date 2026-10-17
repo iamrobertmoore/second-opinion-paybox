@@ -65,6 +65,28 @@ async function polyQuote(p) {
 
 const c = (x) => Math.round(x * 10000) / 100; // dollars -> cents, 2dp
 
+// Taker fees per share, in dollars. World's quote already includes its cost (no separate fee line).
+// Kalshi: 0.07 x p x (1-p), rounded up to the cent per order (ignored here, so small orders pay a little more).
+// Polymarket: rate x p x (1-p), rate by category (docs.polymarket.com/trading/fees). World's category stands in for Polymarket's.
+const POLY_RATE = { crypto: 0.07, sports: 0.05, economics: 0.05, culture: 0.05, finance: 0.04, politics: 0.04, tech: 0.04 };
+export const takerFee = (venue, p, category) => (venue === "Kalshi" ? 0.07 : POLY_RATE[category] ?? 0.05) * p * (1 - p);
+
+// World's premium after the other venues' taker fees, across the same 793 outcomes as the baseline.
+export const AFTER_FEES = (() => {
+  const prem = [];
+  for (const m of INDEX.markets) {
+    const s = m.snap;
+    if (!s || m.venues_disagree) continue;
+    const all = [];
+    if (s.kalshi_ask) all.push(s.kalshi_ask + takerFee("Kalshi", s.kalshi_ask, m.category));
+    if (s.poly_ask) all.push(s.poly_ask + takerFee("Polymarket", s.poly_ask, m.category));
+    if (all.length) prem.push((m.world_yes_ask - Math.min(...all)) * 100);
+  }
+  prem.sort((a, b) => a - b);
+  return { n: prem.length, median_premium_cents: Math.round(prem[Math.floor((prem.length - 1) / 2)] * 100) / 100,
+    world_cheapest: prem.filter((x) => x <= 0).length, two_cents_or_more: prem.filter((x) => x >= 2).length };
+})();
+
 export function findMarket(ticker) {
   return BY_TICKER.get(String(ticker || "").trim().toUpperCase()) || null;
 }
@@ -112,6 +134,18 @@ export async function secondOpinion({ ticker, worldAsk, source }) {
       line = `World is ${premium}c (${premiumPct}%) above ${best.venue}, well past its usual ${BASELINE.median_premium_cents}c. Worth waiting, or setting a limit at ${limit}c.`;
     }
   }
+  // The same comparison after the other venues' taker fees (World's quote is all-in).
+  let afterFees = null;
+  if (quoted.length) {
+    const all = quoted.map((v) => ({ venue: v.venue, all_in: v.yes_ask + takerFee(v.venue, v.yes_ask, m.category) }))
+      .sort((a, b) => a.all_in - b.all_in);
+    const p = c(w - all[0].all_in);
+    afterFees = { best_venue: all[0].venue, best_all_in_cents: c(all[0].all_in), premium_cents: p,
+      venues: all.map((a) => ({ venue: a.venue, all_in_cents: c(a.all_in) })) };
+    if (verdict !== "CHECK_RULES") line += p <= 0
+      ? ` After Kalshi's and Polymarket's taker fees, World is the cheapest (${all[0].venue} costs ${c(all[0].all_in)}c all-in).`
+      : ` After their taker fees, World is ${p}c above ${all[0].venue}.`;
+  }
   return {
     ok: true,
     checked_at: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
@@ -119,10 +153,10 @@ export async function secondOpinion({ ticker, worldAsk, source }) {
       closes: m.close_time ? new Date(m.close_time * 1000).toISOString().slice(0, 10) : null },
     world: { yes_ask_cents: c(w), source: worldSource },
     venues: [k, p].map(({ rules, ...v }) => ({ ...v, yes_ask_cents: v.yes_ask ? c(v.yes_ask) : null })),
-    verdict, line, premium_cents: premium, premium_pct: premiumPct, buy_at_or_below_cents: limit,
+    verdict, line, premium_cents: premium, after_fees: afterFees, premium_pct: premiumPct, buy_at_or_below_cents: limit,
     baseline: { median_premium_cents: BASELINE.median_premium_cents, p90_premium_cents: BASELINE.p90_premium_cents,
       measured_on: `${BASELINE.n} matched World outcomes, ${SNAPSHOT_UTC}` },
-    note: "YES asks before venue fees. A price check, not financial advice.",
+    note: "The verdict compares YES asks. after_fees adds Kalshi's and Polymarket's taker fees (World's quote is all-in). A price check, not financial advice.",
     settlement: { world_rules: m.rules, oracle: m.oracle === "chainlink" ? "Chainlink data, written on chain by World" : "World",
       dispute_window_minutes: m.dispute_window_s ? Math.round(m.dispute_window_s / 60) : null,
       kalshi_rules: k.rules || null },
