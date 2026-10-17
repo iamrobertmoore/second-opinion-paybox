@@ -58,7 +58,7 @@ The plugin has three tools:
 
 ## Proof it runs end to end
 
-Four real paid checks from my own PayBox account. In the last two, the agent took World's live price from PayBox's World plugin before calling Second Opinion:
+Six real paid checks from my own PayBox account. In the last four, the agent took World's live price from PayBox's World plugin before calling Second Opinion:
 
 | When (UTC) | Market and verdict | Base transaction |
 |---|---|---|
@@ -66,6 +66,8 @@ Four real paid checks from my own PayBox account. In the last two, the agent too
 | 16 Oct 16:04 | Newsom YES 2028: STRETCHED, same numbers | [`0x872e1d37...4c3b`](https://basescan.org/tx/0x872e1d3704220b05194f971c3b4902867c8fa31211dba69b9029db9efb754c3b) |
 | 16 Oct 16:24 | Newsom YES 2028: STRETCHED, World's live ask 10.55c from the World plugin vs Kalshi 10.00c and Polymarket 9.00c | [`0xf46b8dc6...a6a7`](https://basescan.org/tx/0xf46b8dc6db9cf368d478e1fca67ef41eb7b859d3169e06b4d980f4498020a6a7) |
 | 17 Oct 07:17 | Karen Bass YES, LA mayor: FAIR PRICE, World's live ask 47.75c vs 47c on Kalshi and Polymarket. After their taker fees, World is the cheapest | [`0xfe217631...3300`](https://basescan.org/tx/0xfe21763115c16c17f3c276e120affb8d9dbb875903b86f217e79d03479023300) |
+| 17 Oct 13:53 | Karen Bass YES: FAIR PRICE again, with the wallet set to ask for my approval in PayBox each time | [`0xfdfbb39b...5a70`](https://basescan.org/tx/0xfdfbb39b950e04fb0f84c2ce43216296d012b4e0e41750af7fac6b5895d85a70) |
+| 17 Oct 13:57 | Karen Bass YES: FAIR PRICE, same numbers, approved in PayBox | [`0xf926e239...4609`](https://basescan.org/tx/0xf926e2394f1e530ac8267e31634df9576fa66dddb8c5e47583bf13768fa64609) |
 
 Anyone can decode a payment from Base with `/api/verify`, for example [the Karen Bass run](https://second-opinion-paybox.vercel.app/api/verify?tx=0xfe21763115c16c17f3c276e120affb8d9dbb875903b86f217e79d03479023300). Each one is a 10,000-unit (0.01) USDC transfer on Base from my PayBox wallet (`0x011E...Ff29`) to the service's receiving address (`0x7BcA...c2c77`), settled through x402. The x402 facilitator submits it in a Multicall3 batch, so on Basescan the transaction's sender is the facilitator; the USDC transfer line shows my wallet paying.
 

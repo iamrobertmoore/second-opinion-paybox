@@ -29,7 +29,7 @@ curl -s "https://second-opinion-paybox.vercel.app/api/preview?ticker=WXVENLEADER
 # verdict: CHECK_RULES ("Kalshi and Polymarket are 6.5c apart ... their rules differ")
 ```
 
-Any of the four payments, decoded from Base:
+Any of the six payments, decoded from Base:
 
 ```
 curl -s "https://second-opinion-paybox.vercel.app/api/verify?tx=0xfe21763115c16c17f3c276e120affb8d9dbb875903b86f217e79d03479023300"
@@ -46,8 +46,8 @@ Once PayBox approves the plugin, enable **Second Opinion** at [app.paybox.sh/plu
 | Claim | Evidence | How to check |
 |---|---|---|
 | The plugin is submitted and passes PayBox's checks (3 tools) | Developer portal screenshot, 17 Oct | [docs/portal-submitted.png](docs/portal-submitted.png) |
-| Four checks were paid through PayBox, 0.01 USDC each, on Base | Base transactions, 16 and 17 Oct | `/api/verify?tx=...`, or Basescan |
-| In the last two runs the agent used World's live price from PayBox's World plugin | The receipts say `source: your agent (PayBox World plugin)`; recorded in the video | Video; receipt JSON in each run |
+| Six checks were paid through PayBox, 0.01 USDC each, on Base | Base transactions, 16 and 17 Oct | `/api/verify?tx=...`, or Basescan |
+| In the last four runs the agent used World's live price from PayBox's World plugin | The receipts say `source: your agent (PayBox World plugin)`; recorded in the video | Video; receipt JSON in each run |
 | The endpoint asks for payment and refuses unknown markets first | Live HTTP responses | The curl commands above |
 | Median World premium 0.56c, 49 of 793 at 2c or more | Measured on the 16 Oct 11:43 UTC snapshot | `indexer/`, `service/data/index.json` |
 | After the other venues' taker fees, World is cheapest on 408 of 793 | Computed from the same snapshot with the venues' published fee formulas | `service/lib/check.js` (`AFTER_FEES`) |
