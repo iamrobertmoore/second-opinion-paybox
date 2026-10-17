@@ -7,7 +7,7 @@
 <meta name="description" content="A PayBox plugin. Before an agent buys a YES on World, it pays 0.01 USDC to compare the price with Kalshi and Polymarket and gets a verdict.">
 <meta name="theme-color" content="#3B1CF5">
 <meta property="og:title" content="Second Opinion for PayBox">
-<meta property="og:description" content="Your agent pays a cent to catch the one bad price in ten.">
+<meta property="og:description" content="Your agent pays a cent to check World's price against Kalshi and Polymarket before it buys.">
 <meta property="og:image" content="https://second-opinion-paybox.vercel.app/og.png">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
@@ -298,7 +298,7 @@ footer{background:var(--ink);color:var(--slip)}
   <div class="stage">
     <div class="pitch">
       <h1>Same bet.<br><em>Two prices.</em></h1>
-      <p class="sub">The same outcome often trades on World, Kalshi and Polymarket at once. On most outcomes World is within about half a cent of the best price. I built a PayBox plugin so your agent pays <b>a cent</b> to catch the ones that aren't, before it buys.</p>
+      <p class="sub">The same outcome often trades on World, Kalshi and Polymarket at once. Half the time World is within about half a cent of the best price, and nine times in ten within 1.6¢. I built a PayBox plugin so your agent pays <b>a cent</b> to catch the ones that aren't, before it buys.</p>
 
       <div class="judge">
         <label class="jl" for="q">Try it free on a real World market</label>
@@ -421,7 +421,7 @@ footer{background:var(--ink);color:var(--slip)}
       <div><b class="red" data-f="two" style="color:var(--red)">28</b><span>still 2¢ or more over after fees</span></div>
     </div>
     <p class="lead">On the 49 outcomes that are 2¢ or more over before fees, a buyer pays a median of about $20 more per $100 than on the cheaper venue.</p>
-    <p class="method"><b>Method.</b> World quotes come from the PayBox World plugin. Kalshi and Polymarket quotes come from their public APIs. I only compare the same outcome with the same resolution period, and I leave out the 23 pairs where Kalshi and Polymarket disagree by more than 3¢, because that usually means the rules differ. The verdict compares YES asks. The after-fees view adds Kalshi's taker fee (0.07 × p × (1 − p) per share) and Polymarket's (its category rate × p × (1 − p)), using World's category for Polymarket's; Kalshi's rounding up to the cent per order is left out. Snapshot <span class="snap-full">16 Oct 2026, 11:43 UTC</span>.</p>
+    <p class="method"><b>Method.</b> World quotes come from the PayBox World plugin. Kalshi and Polymarket quotes come from their public APIs. I only compare the same outcome with the same resolution period, and I leave out the 23 pairs where Kalshi and Polymarket disagree by more than 3¢, because that usually means the rules differ. The verdict compares YES asks. The after-fees view adds Kalshi's taker fee (0.07 × p × (1 − p) per share) and Polymarket's (its category rate, 0 to 0.07, × p × (1 − p)), using World's category for Polymarket's; Kalshi's rounding up to the cent per order is left out. Snapshot <span class="snap-full">16 Oct 2026, 11:43 UTC</span>.</p>
   </section>
 
   <section class="sec numsec" id="proof" aria-labelledby="proof-h">

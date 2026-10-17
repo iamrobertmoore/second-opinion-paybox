@@ -9,15 +9,15 @@ A PayBox plugin for World markets, built for MoonPay Hackathons, Chapter 1 (Pred
 
 ---
 
-The same outcome often trades on World, Kalshi and Polymarket at once. On 16 October I matched **793 live World outcomes** to the same outcome on the other two. On most of them World was within about half a cent of the best price (a median of **0.56c**). But **49** were 2c or more over, and on those a buyer paid a median of about $20 more per $100 than on the cheaper venue.
+The same outcome often trades on World, Kalshi and Polymarket at once. On 16 October I matched **793 live World outcomes** to the same outcome on the other two. On half of them World was within **0.56c** of the cheapest other venue, and on 90% within 1.56c. But **49** were 2c or more over on the quoted price, and on those a buyer paid a median of about $20 more per $100 than on the cheaper venue. After Kalshi's and Polymarket's taker fees the picture is kinder to World (it is the cheapest on 408 of the 793), but **28** were still 2c or more over.
 
 An agent buying on your behalf can't tell a normal price from one of those. So I built a PayBox plugin that lets it ask. It costs 0.01 USDC on Base, paid through PayBox with your approval, and it comes back with a receipt:
 
 - World's price, Kalshi's and Polymarket's for the same outcome, side by side
 - World's premium, measured against World's own usual premium
 - the same comparison after Kalshi's and Polymarket's taker fees (World doesn't add a separate fee)
-- a verdict the agent can act on: **BEST PRICE**, **FAIR PRICE**, or **STRETCHED** (worth waiting, or setting a limit at a given price). If Kalshi and Polymarket disagree by more than 3c, it says **CHECK RULES** instead, because that usually means the markets aren't quite the same question
-- how the market settles: the rules, Chainlink as the data source, the 5-minute dispute window, the close date
+- a verdict the agent can act on: **BEST PRICE**, **FAIR PRICE**, or **STRETCHED** (worth waiting, or only buying at a given price or less). BEST PRICE means World is at or below the cheapest other venue. If Kalshi and Polymarket disagree by more than 3c, it says **CHECK RULES** instead, because that usually means the markets aren't quite the same question
+- how the market settles, from World's own market data: the rules, the data source (Chainlink), the dispute window, the close date
 
 Most checks come back FAIR PRICE, because on most outcomes World is priced in line with the other two. You pay the cent to catch the ones where it isn't.
 
@@ -65,7 +65,7 @@ Four real paid checks from my own PayBox account. In the last two, the agent too
 | 16 Oct 16:24 | Newsom YES 2028: STRETCHED, World's live ask 10.55c from the World plugin vs Kalshi 10.00c and Polymarket 9.00c | [`0xf46b8dc6...a6a7`](https://basescan.org/tx/0xf46b8dc6db9cf368d478e1fca67ef41eb7b859d3169e06b4d980f4498020a6a7) |
 | 17 Oct 07:17 | Karen Bass YES, LA mayor: FAIR PRICE, World's live ask 47.75c vs 47c on Kalshi and Polymarket. After their taker fees, World is the cheapest | [`0xfe217631...3300`](https://basescan.org/tx/0xfe21763115c16c17f3c276e120affb8d9dbb875903b86f217e79d03479023300) |
 
-Each one is a 10,000-unit (0.01) USDC transfer on Base from my PayBox wallet to the service's receiving address, settled through x402.
+Each one is a 10,000-unit (0.01) USDC transfer on Base from my PayBox wallet (`0x011E...Ff29`) to the service's receiving address (`0x7BcA...c2c77`), settled through x402. The x402 facilitator submits it in a Multicall3 batch, so on Basescan the transaction's sender is the facilitator; the USDC transfer line shows my wallet paying.
 
 The plugin is submitted in PayBox's developer portal, with its checks passed and all 3 tools found:
 
@@ -82,15 +82,26 @@ On 16 October at 11:43 UTC I pulled every active World market through PayBox's W
 | 90th percentile | 1.56c |
 | Outcomes 2c or more over | 49 |
 
-Prices are YES asks before venue fees, and these numbers set the verdicts. FAIR means the premium sits inside World's normal range. STRETCHED means it is above about the 90th percentile (1.6c), or 1c or more and over 15% on top of the other venue's price.
+Prices are YES asks before venue fees, and these numbers set the verdicts. I kept the verdict on the quoted price on purpose: it asks whether World's price is in line with where the market is trading, and the after-fees line says what the same share would actually cost elsewhere. An agent gets both. FAIR means the premium sits inside World's normal range. STRETCHED means it is above about the 90th percentile (1.6c), or 1c or more and over 15% on top of the other venue's price.
 
-Kalshi and Polymarket also charge buyers a taker fee: Kalshi 0.07 × p × (1 − p) per share, Polymarket its category rate (0.04 to 0.07) × p × (1 − p). World doesn't add a separate trading fee; its cost is in the quote. With those fees added, World is the cheapest venue on **408 of the 793** outcomes, the median premium is **−0.05c**, and **28** are still 2c or more over. Every receipt shows this after-fees view next to the verdict. (I used World's category for Polymarket's fee rate and left out Kalshi's rounding up to the cent per order.)
+Kalshi and Polymarket also charge buyers a taker fee: Kalshi 0.07 × p × (1 − p) per share, Polymarket its category rate (0 for geopolitics, 0.04 for politics, up to 0.07 for crypto) × p × (1 − p). World doesn't add a separate trading fee; its cost is in the quote. With those fees added, World is the cheapest venue on **408 of the 793** outcomes, the median premium is **−0.05c**, and **28** are still 2c or more over. Since 17 October every receipt shows this after-fees view next to the verdict. (I used World's category for Polymarket's fee rate and left out Kalshi's rounding up to the cent per order.)
 
 | After the other venues' taker fees | Value |
 |---|---|
 | World cheapest | 408 of 793 |
 | Median World premium | −0.05c |
 | Outcomes 2c or more over | 28 |
+
+How the verdicts fall across all 816 matched outcomes at the snapshot:
+
+| Verdict | On the quoted price | After the other venues' fees |
+|---|---|---|
+| BEST PRICE | 2 | 408 |
+| FAIR PRICE | 620 | 258 |
+| STRETCHED | 171 | 127 |
+| CHECK RULES | 23 | 23 |
+
+STRETCHED catches more than the 49 that are 2c or more over, because on cheap shares a smaller gap can still be over 15% of the price.
 
 ## How it works
 

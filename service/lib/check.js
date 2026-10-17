@@ -131,7 +131,7 @@ export async function secondOpinion({ ticker, worldAsk, source }) {
     } else {
       verdict = "STRETCHED";
       limit = Math.round(fairCap * 1000) / 10;
-      line = `World is ${premium}c (${premiumPct}%) above ${best.venue}, well past its usual ${BASELINE.median_premium_cents}c. Worth waiting, or setting a limit at ${limit}c.`;
+      line = `World is ${premium}c (${premiumPct}%) above ${best.venue}, well past its usual ${BASELINE.median_premium_cents}c. Worth waiting, or only buying at ${limit}c or less.`;
     }
   }
   // The same comparison after the other venues' taker fees (World's quote is all-in).
