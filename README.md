@@ -5,7 +5,7 @@
 <p align="center"><strong>Before your agent buys a prediction, it pays a cent for a second opinion.</strong><br>
 A PayBox plugin for World markets, built for MoonPay Hackathons, Chapter 1 (Predictions).</p>
 
-<p align="center"><a href="https://second-opinion-paybox.vercel.app">Try it on a real World market</a> · <a href="#how-your-agent-uses-it">Use it in PayBox</a> · <a href="#proof-it-runs-end-to-end">Proof it runs</a> · <a href="JUDGES.md">For judges</a></p>
+<p align="center"><a href="https://second-opinion-paybox.vercel.app">Try it on a real World market</a> · <a href="#how-your-agent-uses-it">Use it in PayBox</a> · <a href="#proof-it-runs-end-to-end">Proof it runs</a> · <a href="docs/second-opinion-demo.mp4">Watch the demo (1:27)</a> · <a href="JUDGES.md">For judges</a></p>
 
 ---
 

@@ -6,7 +6,7 @@ Three ways to check Second Opinion, from quickest to most thorough.
 
 1. Open [second-opinion-paybox.vercel.app](https://second-opinion-paybox.vercel.app) and press **Check** on any chip. The same check runs live against Kalshi and Polymarket (World's price comes from the 16 October snapshot on this free page).
 2. Scroll to **Proof it runs**. Each paid run has a **Check on Base** link that reads the payment straight from a public Base RPC.
-3. Watch the demo video on X: two real paid runs in Claude with PayBox, one STRETCHED and one FAIR PRICE.
+3. Watch the demo, [docs/second-opinion-demo.mp4](docs/second-opinion-demo.mp4) (also posted on X): two real paid runs in Claude with PayBox, one STRETCHED and one FAIR PRICE.
 
 ## 2. Check it yourself from a terminal
 
