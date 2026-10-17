@@ -56,15 +56,20 @@ The plugin has three tools:
 
 ## Proof it runs end to end
 
-Three real paid checks from my own PayBox account on 16 October, all on Newsom YES for 2028. The third used plugin v1.2, where the agent fetched World's live price from the World plugin first:
+Four real paid checks from my own PayBox account. In the last two, the agent took World's live price from PayBox's World plugin before calling Second Opinion:
 
-| When (UTC) | Verdict | Base transaction |
+| When (UTC) | Market and verdict | Base transaction |
 |---|---|---|
-| 15:58 | STRETCHED, World 10.55c vs Polymarket 9.00c, buy at 9.6c or less | [`0x970adb03...8b8a`](https://basescan.org/tx/0x970adb03a9dc0d1d82a8ac0756859547a96fe6d46348d807d7d0b913e3ed8b8a) |
-| 16:04 | STRETCHED, same numbers | [`0x872e1d37...4c3b`](https://basescan.org/tx/0x872e1d3704220b05194f971c3b4902867c8fa31211dba69b9029db9efb754c3b) |
-| 16:24 | STRETCHED, World's live ask 10.55c from the World plugin vs Kalshi 10.00c and Polymarket 9.00c | [`0xf46b8dc6...a6a7`](https://basescan.org/tx/0xf46b8dc6db9cf368d478e1fca67ef41eb7b859d3169e06b4d980f4498020a6a7) |
+| 16 Oct 15:58 | Newsom YES 2028: STRETCHED, World 10.55c vs Polymarket 9.00c, buy at 9.6c or less | [`0x970adb03...8b8a`](https://basescan.org/tx/0x970adb03a9dc0d1d82a8ac0756859547a96fe6d46348d807d7d0b913e3ed8b8a) |
+| 16 Oct 16:04 | Newsom YES 2028: STRETCHED, same numbers | [`0x872e1d37...4c3b`](https://basescan.org/tx/0x872e1d3704220b05194f971c3b4902867c8fa31211dba69b9029db9efb754c3b) |
+| 16 Oct 16:24 | Newsom YES 2028: STRETCHED, World's live ask 10.55c from the World plugin vs Kalshi 10.00c and Polymarket 9.00c | [`0xf46b8dc6...a6a7`](https://basescan.org/tx/0xf46b8dc6db9cf368d478e1fca67ef41eb7b859d3169e06b4d980f4498020a6a7) |
+| 17 Oct 07:17 | Karen Bass YES, LA mayor: FAIR PRICE, World's live ask 47.75c vs 47c on Kalshi and Polymarket. After their taker fees, World is the cheapest | [`0xfe217631...3300`](https://basescan.org/tx/0xfe21763115c16c17f3c276e120affb8d9dbb875903b86f217e79d03479023300) |
 
 Each one is a 10,000-unit (0.01) USDC transfer on Base from my PayBox wallet to the service's receiving address, settled through x402.
+
+The plugin is submitted in PayBox's developer portal, with its checks passed and all 3 tools found:
+
+<p align="center"><img src="docs/portal-submitted.png" alt="PayBox developer portal: Second Opinion submitted, checks passed, 3 tools, available in PayBox while it is reviewed" width="720"></p>
 
 ## The number, and how I got it
 
